@@ -1,0 +1,7 @@
+﻿namespace Data.Paths
+{
+    public static class ConfigPaths
+    {
+        public const string WINDOWS_CONFIG_PATH = "Configs/UI";
+    }
+}
