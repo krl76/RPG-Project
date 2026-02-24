@@ -14,13 +14,16 @@ namespace prototype_Roma.Scripts
         
         private readonly InputManager _inputManager;
         private readonly IPlayerService _playerService;
+        private readonly IPlayerAnimatorService _playerAnimatorService;
 
         private PlayerMovementBehaviour _playerMovement;
 
-        public MovementInputService(InputManager inputManager, IPlayerService playerService)
+        public MovementInputService(InputManager inputManager, IPlayerService playerService,
+            IPlayerAnimatorService playerAnimatorService)
         {
             _inputManager = inputManager;
             _playerService = playerService;
+            _playerAnimatorService = playerAnimatorService;
         }
         
         public void InstallService()
@@ -29,16 +32,16 @@ namespace prototype_Roma.Scripts
 
             _playerMovement = _playerService.PlayerObject.GetComponent<PlayerMovementBehaviour>();
             
-            _inputManager.Actions.MovePlayer += OnMove;
+            _inputManager.Actions.Move += OnMove;
 
             _inputManager.Actions.Jump += OnJump;
 
-            _inputManager.Actions.Sprint += OnSprint; // только start и canceled
+            _inputManager.Actions.Sprint += OnSprint;
         }
 
         public void UninstallService()
         {
-            _inputManager.Actions.MovePlayer -= OnMove;
+            _inputManager.Actions.Move -= OnMove;
 
             _inputManager.Actions.Jump -= OnJump;
             
@@ -72,6 +75,7 @@ namespace prototype_Roma.Scripts
             
             if (IsMoving) MoveVector = _continueMoveVector;
             else MoveVector = Vector2.zero;
+            _playerAnimatorService.SetMoveVector(MoveVector);
             _playerMovement.OnMovementChange();
         }
 

@@ -3,5 +3,6 @@
     public static class ConfigPaths
     {
         public const string WINDOWS_CONFIG_PATH = "Configs/UI";
+        public const string PLAYERSTATS_CONFIG_PATH = "Configs/PlayerStats";
     }
 }

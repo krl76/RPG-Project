@@ -1,4 +1,5 @@
-﻿using Infrastructure.Services.UI;
+﻿using Data.Configs;
+using Infrastructure.Services.UI;
 using UnityEngine;
 
 namespace Infrastructure.Providers.Configs
@@ -7,5 +8,6 @@ namespace Infrastructure.Providers.Configs
     {
         void Load();
         GameObject GetWindowPrefab(WindowID id);
+        PlayerStatsConfig GetPlayerStatsConfig();
     }
 }

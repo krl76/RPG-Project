@@ -13,7 +13,7 @@ namespace prototype_Roma.Scripts
             _fightInputService = fightInputService;
         }
 
-        public void AttackAnimationCompleted()
+        public void AttackCompleted()
         {
             _fightInputService.AttackEnd();
         }

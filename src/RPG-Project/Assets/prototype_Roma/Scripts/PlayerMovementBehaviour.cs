@@ -1,5 +1,10 @@
+using System;
 using System.Collections;
+using Data.Configs;
+using Infrastructure.Providers.Configs;
+using prototype_Roma.Scripts;
 using UnityEngine;
+using Zenject;
 
 public class PlayerMovementBehaviour : MonoBehaviour
 {
@@ -42,7 +47,9 @@ public class PlayerMovementBehaviour : MonoBehaviour
     private PlayerStatsConfig _config;
     private ICameraService _cameraService;
     private IPlayerAnimatorService _animator;
-    private IHealth _health;
+
+    private IConfigDataProvider _configDataProvider;
+    /*private IHealth _health;*/
     
     [Inject]
     private void Construct(IMovementInputService movementInputService, IPlayerService playerService,
@@ -52,11 +59,16 @@ public class PlayerMovementBehaviour : MonoBehaviour
         _movementInput = movementInputService;
         _playerService = playerService;
         _cameraService = cameraService;
-        _config = configDataProvider.GetPlayerStatsConfig();
+        _configDataProvider = configDataProvider;
         _animator = playerAnimatorService;
     }
 
-        public void OnJumpPressed()
+    private void Start() // delete when proper bootstrap setup
+    {
+        _config = _configDataProvider.GetPlayerStatsConfig();
+    }
+
+    public void OnJumpPressed()
         {
             if (_isOnGround | _coyoteTimer > 0)
             {
@@ -98,24 +110,22 @@ public class PlayerMovementBehaviour : MonoBehaviour
         
         private void OnEnable()
         {
-            _cameraService.CameraRotationChanged += ChangeCameraRotation;
+            _cameraService.CameraRotationChanged += ChangePlayerRotation;
 
-            _health = GetComponent<PlayerHealth>();
-            _health.HealthChanged += Hit;
+            /*_health = GetComponent<PlayerHealth>();
+            _health.HealthChanged += Hit;*/
         }
 
         private void OnDisable()
         {
-            _cameraService.CameraRotationChanged -= ChangeCameraRotation;
-            _health.HealthChanged -= Hit;
+            _cameraService.CameraRotationChanged -= ChangePlayerRotation;
+            /*_health.HealthChanged -= Hit;*/
         }
 
 
         private void Update()
         {
             UpdateTimers();
-            
-            UpdateRotation();
             
             if (_movementInput.IsMoving) _currentMovement = new Vector3(_rotatedMovement.x, _currentMovement.y, _rotatedMovement.y);
             else _currentMovement = new Vector3(0, _currentMovement.y, 0);
@@ -166,22 +176,6 @@ public class PlayerMovementBehaviour : MonoBehaviour
             _currentMovement.y = MathF.Min(_currentMovement.y, _config.VelocityLimit);
         }
 
-        private void UpdateRotation()
-        {
-            if (!_movementInput.IsMoving) return;
-            float rotationSpeed = _config.RotationSpeed;
-            if (IsFalling) rotationSpeed /= 3;
-
-            Vector3 positionToLookAt = new Vector3(_currentMovement.x, 0, _currentMovement.z);
-            if (positionToLookAt == Vector3.zero) return;
-
-            Quaternion targetRotation = Quaternion.LookRotation(positionToLookAt);
-            float angle = Quaternion.Angle(transform.rotation, targetRotation);
-            _rotationSlow = (180 - angle) / (180 + _config.RotationSlowCoef * angle);
-            
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        }
-
         private void FixedUpdate()
         {
             bool state = Physics.BoxCast(_RaycastOrigin.position, _boxCastHalfSize,
@@ -204,7 +198,6 @@ public class PlayerMovementBehaviour : MonoBehaviour
         private void Hit()
         {
             _hitSlow = 0.1f;
-            if (_actionInputService.IsActionCanInterrupted) _actionInputService.ActionInterrupted();
             StartCoroutine(ReturnNormalSpeed());
         }
 
@@ -213,9 +206,10 @@ public class PlayerMovementBehaviour : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
             _hitSlow = 1;
         }
-        private void ChangeCameraRotation()
+        private void ChangePlayerRotation()
         {
-            _moveVectorRotation = Quaternion.AngleAxis(-_cameraService.GetPanAxisRotation(), Vector3.forward);
+            transform.rotation = _cameraService.GetCameraRotation();
+            _moveVectorRotation = Quaternion.AngleAxis(-_cameraService.GetCameraAngle(), Vector3.forward);
             OnMovementChange();
         }
 }

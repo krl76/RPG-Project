@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace prototype_Roma.Scripts
 {
     public class PlayerAnimatorService : IPlayerAnimatorService
@@ -14,26 +16,35 @@ namespace prototype_Roma.Scripts
         
         private readonly int _moveSpeed = Animator.StringToHash("MoveSpeed");
         private readonly int _moveSpeedJump = Animator.StringToHash("MoveSpeedJump");
+
+        private readonly int _moveX = Animator.StringToHash("moveX");
+        private readonly int _moveY = Animator.StringToHash("moveY");
         
         private bool _isMovingCheck = false;
         private bool _isFallingCheck = false;
 
         private float _currentMoveSpeed = 0;
+        private Vector2 _savedVector = Vector2.zero;
         
         private Animator _animator;
 
-        private readonly IFightInputService _fightInputService;
+        private  IFightInputService _fightInputService;
+        
         private readonly IPlayerService _playerService;
 
-        private PlayerAnimatorService(IFightInputService fightInputService, IPlayerService playerService)
+        private PlayerAnimatorService(IPlayerService playerService)
         {
-            _fightInputService = fightInputService;
             _playerService = playerService;
         }
         
         public void InstallService()
         {
-            _animator = _playerService.Player.GetComponent<Animator>();
+            _animator = _playerService.PlayerObject.GetComponent<Animator>();
+        }
+
+        public void SetFightInputService(IFightInputService fightInputService)
+        {
+            _fightInputService = fightInputService;
         }
 
         public void ResetTriggersByHit()
@@ -74,7 +85,6 @@ namespace prototype_Roma.Scripts
         public void TriggerDeath()
         {
             _animator.SetTrigger(_die);
-            _playerService.Player.GetComponent<DeathEffectBehaviour>().PlayEffect();
         }
 
         public void ChangeMoveSpeed(float newSpeed)
@@ -82,8 +92,18 @@ namespace prototype_Roma.Scripts
             _animator.SetFloat(_moveSpeed, newSpeed/10);
             _currentMoveSpeed = newSpeed;
             ChangeMoveSpeedJump();
+            SetMoveVector(_savedVector);
         }
-        
+
+        public void SetMoveVector(Vector2 vector)
+        {
+            float runCoef = 0.5f;
+            _savedVector = vector;
+            if (_currentMoveSpeed > 5) runCoef = 1;
+            _animator.SetFloat(_moveX, vector.x * runCoef);
+            _animator.SetFloat(_moveY, vector.y * runCoef);
+        }
+
         private void ChangeMoveSpeedJump()
         {
             float jumpSpeed;

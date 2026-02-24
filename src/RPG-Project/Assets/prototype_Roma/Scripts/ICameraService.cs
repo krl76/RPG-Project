@@ -9,8 +9,9 @@ namespace prototype_Roma.Scripts
         public GameObject CameraObject { get; }
         public Camera Camera { get; }
         public void InstallService();
-        public void UninstallService();
         public void ChangeDistance(float newDistance);
-        public float GetPanAxisRotation();
+        public void SetRotationAngle(float newAngle);
+        public Quaternion GetCameraRotation();
+        public float GetCameraAngle();
     }
 }

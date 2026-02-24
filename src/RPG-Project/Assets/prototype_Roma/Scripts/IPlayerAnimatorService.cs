@@ -1,8 +1,11 @@
+using UnityEngine;
+
 namespace prototype_Roma.Scripts
 {
     public interface IPlayerAnimatorService
     {
         public void InstallService();
+        public void SetFightInputService(IFightInputService fightInputService);
         public void ResetTriggersByHit();
         public void SetMoveBool(bool state);
         public void SetFallBool(bool state);
@@ -13,5 +16,6 @@ namespace prototype_Roma.Scripts
         public void TriggerHit();
         public void TriggerDeath();
         public void ChangeMoveSpeed(float newSpeed);
+        public void SetMoveVector(Vector2 vector);
     }
 }

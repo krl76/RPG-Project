@@ -1,6 +1,8 @@
 using System;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Object = UnityEngine.Object;
 
 namespace prototype_Roma.Scripts
 {
@@ -9,12 +11,12 @@ namespace prototype_Roma.Scripts
         public event Action CameraRotationChanged;
         public GameObject CameraObject { get; private set; }
         public Camera Camera { get; private set; }
-        
-        private Vector2 _standardCameraRotation = Vector2.zero;
+
+        private Quaternion _currentRotation;
+        private float _currentAngle;
         
         private CinemachineCamera _cinemachineCamera;
         private CinemachinePositionComposer _composer;
-        private CinemachinePanTilt _panTilt;
 
         private readonly IPlayerService _playerService;
 
@@ -27,19 +29,10 @@ namespace prototype_Roma.Scripts
         {
             _cinemachineCamera = Object.FindAnyObjectByType<CinemachineCamera>();
             Camera = Camera.main;
-            CameraObject = cinemachineCamera.gameObject;
+            CameraObject = _cinemachineCamera.gameObject;
             _composer = _cinemachineCamera.GetComponent<CinemachinePositionComposer>();
-            _panTilt = _cinemachineCamera.GetComponent<CinemachinePanTilt>();
-            _cinemachineCamera.LookAt = _playerService.player.transform;
-            _cinemachineCamera.Follow = _playerService.player.transform;
-            _standardCameraRotation = new Vector2(_panTilt.PanAxis.Value, _panTilt.TiltAxis.Value);
-
-            // install mouse input
-        }
-
-        public void UninstallService()
-        {
-            // uninstall mouse input
+            _cinemachineCamera.LookAt = _playerService.PlayerTransform;
+            _cinemachineCamera.Follow = _playerService.PlayerTransform;
         }
 
         public void ChangeDistance(float newDistance)
@@ -52,18 +45,15 @@ namespace prototype_Roma.Scripts
             }
         }
 
-        public float GetPanAxisRotation()
+        public void SetRotationAngle(float newAngle)
         {
-            return _panTilt.PanAxis.Value;
+            if (Mathf.Approximately(newAngle, _currentAngle)) return;
+            _currentAngle = newAngle;
+            _currentRotation = Quaternion.Euler(0, newAngle, 0);
+            CameraRotationChanged?.Invoke();
         }
 
-        private void MoveMouse(InputAction.CallbackContext context)
-        {
-            Vector2 rotationChange = Vector2.zero; // get from mouse
-            
-            _panTilt.PanAxis.Value = _standardCameraRotation.x + rotationChange.x; // Vertical Axis (Pitch)
-            _panTilt.TiltAxis.Value = _standardCameraRotation.y + rotationChange.y; // Horizontal Axis (Yaw)
-            CameraRotationChanged?.Invoke(); // проверка на изменение
-        }
+        public Quaternion GetCameraRotation() => _currentRotation;
+        public float GetCameraAngle() => _currentAngle;
     }
 }
