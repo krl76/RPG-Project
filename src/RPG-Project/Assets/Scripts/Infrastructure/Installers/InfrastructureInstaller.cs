@@ -1,9 +1,13 @@
 ﻿using Infrastructure.Factories.Objects;
 using Infrastructure.Factories.UI;
 using Infrastructure.Providers.Configs;
+using Infrastructure.Services.Camera;
+using Infrastructure.Services.Player;
+using Infrastructure.Services.Player.Animator;
+using Infrastructure.Services.Player.Input;
 using Infrastructure.Services.Scene;
 using Infrastructure.Services.UI;
-using prototype_Roma.Scripts;
+using Input.PlayerInput;
 using UnityEngine.Rendering;
 using Zenject;
 

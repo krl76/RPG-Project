@@ -11,8 +11,10 @@ namespace Data.Configs
         [Header("Attack stats")]
         public float MagicAttackCooldown = 2f;
 
-        [Header("Movement stats")]
-        public float MoveSpeed = 10f;
+        [Header("Movement stats")] 
+        public float MoveSpeedCoef = 10f;
+        public float WalkSpeed = 4f;
+        public float RunSpeed = 6f;
         public float DownwardsMultiplier = 1f;
         public float UpwardsMultiplier = 1f;
         public float JumpVelocity = 2f;

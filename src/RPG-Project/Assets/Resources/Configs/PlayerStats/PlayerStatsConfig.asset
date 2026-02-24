@@ -13,13 +13,10 @@ MonoBehaviour:
   m_Name: PlayerStatsConfig
   m_EditorClassIdentifier: Assembly-CSharp::Data.Configs.PlayerStatsConfig
   InitialHealth: 100
-  AttackRadius: 1
-  HitDistance: 1.15
-  InitialDamage: 5
-  InitialArmor: 0
-  MoveSpeed: 10
-  RotationSpeed: 10
-  RotationSlowCoef: 5
+  MagicAttackCooldown: 2
+  MoveSpeedCoef: 5
+  WalkSpeed: 3
+  RunSpeed: 6
   DownwardsMultiplier: 0.7
   UpwardsMultiplier: 1
   JumpVelocity: 2
