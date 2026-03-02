@@ -48,6 +48,10 @@ namespace MonoBehaviours.Player
         
         private const float _gravity = -9.8f;
         
+        private float _animationSmoothTime = 0.2f;
+        private Vector2 _currentAnimVector;
+        private Vector2 _animVelocity;
+        
         private IMovementInputService _movementInput;
         private IPlayerService _playerService;
         private PlayerStatsConfig _config;
@@ -138,6 +142,30 @@ namespace MonoBehaviours.Player
             
             _animator.SetMoveBool(_movementInput.IsMoving);
             
+            Vector2 inputMove = _movementInput.IsMoving ? _movementInput.MoveVector : Vector2.zero;
+
+            if (inputMove.sqrMagnitude > 0.01f) 
+            {
+                inputMove = inputMove.normalized; 
+            }
+
+            float safeCurrentSpeed = Mathf.Clamp(_currentMoveSpeed, _config.WalkSpeed, _config.RunSpeed);
+
+            float sprintProgress = Mathf.InverseLerp(_config.WalkSpeed, _config.RunSpeed, safeCurrentSpeed);
+
+            float blendTreeMultiplier = Mathf.Lerp(0.5f, 1f, sprintProgress);
+
+            Vector2 targetMove = inputMove * blendTreeMultiplier;
+
+            _currentAnimVector = Vector2.SmoothDamp(
+                _currentAnimVector, 
+                targetMove, 
+                ref _animVelocity, 
+                _animationSmoothTime
+            );
+
+            _animator.SetMoveVector(_currentAnimVector);
+            
             UpdateGravity();
             
             _characterController.Move(Vector3.Scale(_currentMovement,
@@ -192,14 +220,20 @@ namespace MonoBehaviours.Player
 
         private IEnumerator ChangeSpeed()
         {
-            while (!Mathf.Approximately(_currentMoveSpeed, _changedMoveSpeed))
+            while (Mathf.Abs(_currentMoveSpeed - _changedMoveSpeed) > 0.05f)
             {
                 _currentMoveSpeed = Mathf.Lerp(_currentMoveSpeed, _changedMoveSpeed,
                     _speedChangeCoefficent * Time.deltaTime);
+                
                 _sprintSpeedCoefficent = _currentMoveSpeed / _config.WalkSpeed;
                 _animator.ChangeMoveSpeed(_currentMoveSpeed);
-                yield return new WaitForEndOfFrame();
+                
+                yield return null; 
             } 
+
+            _currentMoveSpeed = _changedMoveSpeed;
+            _sprintSpeedCoefficent = _currentMoveSpeed / _config.WalkSpeed;
+            _animator.ChangeMoveSpeed(_currentMoveSpeed);
         }
 
         private void Hit()

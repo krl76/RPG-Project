@@ -99,11 +99,10 @@ namespace Infrastructure.Services.Player.Animator
 
         public void SetMoveVector(Vector2 vector)
         {
-            float runCoef = 0.5f;
             _savedVector = vector;
-            if (_currentMoveSpeed > 5) runCoef = 1;
-            _animator.SetFloat(_moveX, vector.x * runCoef);
-            _animator.SetFloat(_moveY, vector.y * runCoef);
+            
+            _animator.SetFloat(_moveX, vector.x);
+            _animator.SetFloat(_moveY, vector.y);
         }
 
         private void ChangeMoveSpeedJump()

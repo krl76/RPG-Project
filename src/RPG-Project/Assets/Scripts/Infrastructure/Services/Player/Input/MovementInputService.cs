@@ -79,7 +79,6 @@ namespace Infrastructure.Services.Player.Input
             
             if (IsMoving) MoveVector = _continueMoveVector;
             else MoveVector = Vector2.zero;
-            _playerAnimatorService.SetMoveVector(MoveVector);
             _playerMovement.OnMovementChange();
         }
 

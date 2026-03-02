@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Data.Configs.PlayerStatsConfig
   InitialHealth: 100
   MagicAttackCooldown: 2
-  MoveSpeedCoef: 5
+  MoveSpeedCoef: 3.5
   WalkSpeed: 3
   RunSpeed: 6
   DownwardsMultiplier: 0.7
