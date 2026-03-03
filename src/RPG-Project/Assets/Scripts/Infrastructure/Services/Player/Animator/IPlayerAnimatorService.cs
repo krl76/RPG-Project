@@ -1,3 +1,4 @@
+using System;
 using Infrastructure.Services.Player.Input;
 using UnityEngine;
 
@@ -14,9 +15,16 @@ namespace Infrastructure.Services.Player.Animator
         public void TriggerLand();
         public void TriggerPhysicalAttack();
         public void TriggerMagicAttack();
+        public void TriggerGrabGun();
         public void TriggerHit();
         public void TriggerDeath();
         public void ChangeMoveSpeed(float newSpeed);
         public void SetMoveVector(Vector2 vector);
+        void ProcessAnimationEvent(string eventId);
+        
+        event Action OnGrabGun;
+        event Action OnGrabGunEnded;
+        event Action OnAttackEnded;
+        event Action OnShootEnded;
     }
 }

@@ -7,8 +7,6 @@ using Infrastructure.Services.Camera;
 using Infrastructure.Services.Player.Animator;
 using Input.PlayerInput;
 using MonoBehaviours.Player;
-using prototype_Roma.Scripts;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Infrastructure.Services.Player.Input
@@ -16,13 +14,13 @@ namespace Infrastructure.Services.Player.Input
     public class FightInputService : IFightInputService
     {
         private bool _isAttackStarted = false;
-
         private bool _isMagicAttackAvailible = true;
+        private bool _isAiming;
         private CancellationTokenSource _cancellationTokenSource;
-        
+
         private PlayerMovementBehaviour _movement;
         private PlayerStatsConfig _config;
-        
+
         private readonly InputManager _inputManager;
         private readonly IPlayerService _playerService;
         private readonly IMovementInputService _movementInputService;
@@ -48,17 +46,26 @@ namespace Infrastructure.Services.Player.Input
         public void InstallService()
         {
             _movement = _playerService.PlayerObject.GetComponent<PlayerMovementBehaviour>();
+            
             _config = _configDataProvider.GetPlayerStatsConfig();
             _animatorService.SetFightInputService(this);
             
             _inputManager.Actions.SwordAttack += OnPhysicalAttack;
-            _inputManager.Actions.MagicAttack += OnMagicAttack;
+            _inputManager.Actions.MagicAttack += OnGrabGun;
+            _inputManager.Actions.SwordAttack += OnMagicAttack; 
+            
+            _animatorService.OnGrabGunEnded += AttackEnd;
+            _animatorService.OnAttackEnded += AttackEnd;
         }
 
         public void UninstallService()
         {
             _inputManager.Actions.SwordAttack -= OnPhysicalAttack;
-            _inputManager.Actions.MagicAttack -= OnMagicAttack;
+            _inputManager.Actions.MagicAttack -= OnGrabGun;
+            _inputManager.Actions.SwordAttack -= OnMagicAttack;
+            
+            _animatorService.OnGrabGunEnded -= AttackEnd;
+            _animatorService.OnAttackEnded -= AttackEnd;
             
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
@@ -68,24 +75,41 @@ namespace Infrastructure.Services.Player.Input
         public void AttackEnd()
         {
             _isAttackStarted = false;
+            _isAiming = false;
             _movementInputService.CanMove = true;
             _movementInputService.ContinueMoveAfterAction();
         }
         
         private void OnPhysicalAttack()
         {
+            if (_isAiming) return; 
             if (!AttackStart()) return;
+            
             _animatorService.TriggerPhysicalAttack();
+        }
+        
+        private void OnGrabGun()
+        {
+            if (_isAiming || !_isMagicAttackAvailible) return;
+            if (!AttackStart()) return;
+            
+            _isAiming = true;
+            _animatorService.TriggerGrabGun();
         }
 
         private void OnMagicAttack()
         {
-            if (!_isMagicAttackAvailible) return;
-            if (!AttackStart()) return;
-            _cancellationTokenSource = new CancellationTokenSource();
+            if (!_isAiming) return;
+            
+            _isAiming = false;
             _isMagicAttackAvailible = false;
-            WaitMagicCooldown(_cancellationTokenSource);
+            
+            _cancellationTokenSource = new CancellationTokenSource();
+            WaitMagicCooldown(_cancellationTokenSource).Forget();
+            
             _animatorService.TriggerMagicAttack();
+
+            // TODO: Вызвать логику Raycast/Spawn пули
         }
 
         private bool AttackStart()
@@ -100,8 +124,10 @@ namespace Infrastructure.Services.Player.Input
 
         private async UniTask WaitMagicCooldown(CancellationTokenSource cancellationTokenSource)
         {
-            await UniTask.Delay((_config.MagicAttackCooldown * 1000).ConvertTo<Int32>(), false,
-                PlayerLoopTiming.Update, cancellationTokenSource.Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(_config.MagicAttackCooldown), 
+                ignoreTimeScale: false, 
+                PlayerLoopTiming.Update, 
+                cancellationTokenSource.Token);
             _isMagicAttackAvailible = true;
         }
     }

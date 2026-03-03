@@ -1,17 +1,29 @@
+using System;
 using Infrastructure.Services.Player.Input;
-using prototype_Roma.Scripts;
 using UnityEngine;
 
 namespace Infrastructure.Services.Player.Animator
 {
     public class PlayerAnimatorService : IPlayerAnimatorService
     {
+        #region Public Events
+
+        public event Action OnGrabGun;
+        public event Action OnGrabGunEnded;
+        public event Action OnShootEnded;
+        public event Action OnAttackEnded;
+        
+        #endregion
+        
+        #region Hashes
+        
         private readonly int _isMoving = UnityEngine.Animator.StringToHash("isMoving");
         private readonly int _isFalling = UnityEngine.Animator.StringToHash("isFalling");
         
         private readonly int _jump = UnityEngine.Animator.StringToHash("Jump");
         private readonly int _land = UnityEngine.Animator.StringToHash("Land");
         private readonly int _physicalAttack = UnityEngine.Animator.StringToHash("PhysicalAttack");
+        private readonly int _grabGun = UnityEngine.Animator.StringToHash("GrabGun");
         private readonly int _magicAttack = UnityEngine.Animator.StringToHash("MagicAttack");
         private readonly int _getHit = UnityEngine.Animator.StringToHash("TakeDamage");
         private readonly int _die = UnityEngine.Animator.StringToHash("Die");
@@ -21,6 +33,10 @@ namespace Infrastructure.Services.Player.Animator
 
         private readonly int _moveX = UnityEngine.Animator.StringToHash("moveX");
         private readonly int _moveY = UnityEngine.Animator.StringToHash("moveY");
+        
+        #endregion
+        
+        #region Private Fields
         
         private bool _isMovingCheck = false;
         private bool _isFallingCheck = false;
@@ -33,6 +49,8 @@ namespace Infrastructure.Services.Player.Animator
         private  IFightInputService _fightInputService;
         
         private readonly IPlayerService _playerService;
+        
+        #endregion
 
         private PlayerAnimatorService(IPlayerService playerService)
         {
@@ -81,6 +99,7 @@ namespace Infrastructure.Services.Player.Animator
 
         public void TriggerPhysicalAttack() => _animator.SetTrigger(_physicalAttack);
         public void TriggerMagicAttack() => _animator.SetTrigger(_magicAttack);
+        public void TriggerGrabGun() => _animator.SetTrigger(_grabGun);
 
         public void TriggerHit() => _animator.SetTrigger(_getHit);
 
@@ -112,6 +131,25 @@ namespace Infrastructure.Services.Player.Animator
             else if (_currentMoveSpeed >= 4) jumpSpeed = 1;
             else jumpSpeed = (_currentMoveSpeed - 2) / 2;
             _animator.SetFloat(_moveSpeedJump, jumpSpeed);
+        }
+        
+        public void ProcessAnimationEvent(string eventId)
+        {
+            switch (eventId)
+            {
+                case "GrabGun":
+                    OnGrabGun?.Invoke();
+                    break;
+                case "GrabGunEnded":
+                    OnGrabGunEnded?.Invoke();
+                    break;
+                case "AttackEnded":
+                    OnAttackEnded?.Invoke();
+                    break;
+                case "ShootEnded":
+                    OnShootEnded?.Invoke();
+                    break;
+            }
         }
     }
 }

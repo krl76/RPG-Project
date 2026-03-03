@@ -1,22 +1,23 @@
-using Infrastructure.Services.Player.Input;
+using Infrastructure.Services.Player.Animator;
 using UnityEngine;
 using Zenject;
 
 namespace MonoBehaviours.Player
 {
+    [RequireComponent(typeof(Animator))]
     public class PlayerEventReader : MonoBehaviour
     {
-        private IFightInputService _fightInputService;
-        
+        private IPlayerAnimatorService _playerAnimatorService;
+
         [Inject]
-        private void Construct(IFightInputService fightInputService)
+        private void Construct(IPlayerAnimatorService playerAnimatorService)
         {
-            _fightInputService = fightInputService;
+            _playerAnimatorService = playerAnimatorService;
         }
 
-        public void AttackCompleted()
+        public void OnAnimationEvent(string eventId)
         {
-            _fightInputService.AttackEnd();
+            _playerAnimatorService.ProcessAnimationEvent(eventId);
         }
     }
 }
