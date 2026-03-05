@@ -5,13 +5,13 @@ namespace Infrastructure.Services.Camera
 {
     public interface ICameraService
     {
-        public event Action CameraRotationChanged;
-        public GameObject CameraObject { get; }
-        public UnityEngine.Camera Camera { get; }
-        public void InstallService();
-        public void ChangeDistance(float newDistance);
-        public void SetRotationAngle(float newAngle);
-        public Quaternion GetCameraRotation();
-        public float GetCameraAngle();
+        event Action CameraRotationChanged;
+        GameObject CameraObject { get; }
+        UnityEngine.Camera Camera { get; }
+        void InstallService();
+        void ChangeDistance(float newDistance);
+        void SetRotationAngle(Vector2 deltaRotation); 
+        Quaternion GetCameraRotation();
+        Vector2 GetCameraAngle();
     }
 }

@@ -12,11 +12,11 @@ namespace Infrastructure.Services.Camera
         public GameObject CameraObject { get; private set; }
         public UnityEngine.Camera Camera { get; private set; }
 
-        private Quaternion _currentRotation;
-        private float _currentAngle;
+        private Transform _cameraTarget;
+        private Vector2 _currentRotation;
         
         private CinemachineCamera _cinemachineCamera;
-        private CinemachinePositionComposer _composer;
+        private CinemachineThirdPersonFollow _thirdPersonFollow;
 
         private readonly IPlayerService _playerService;
 
@@ -27,33 +27,42 @@ namespace Infrastructure.Services.Camera
         
         public void InstallService()
         {
-            _cinemachineCamera = Object.FindAnyObjectByType<CinemachineCamera>();
             Camera = UnityEngine.Camera.main;
+            _cinemachineCamera = Object.FindAnyObjectByType<CinemachineCamera>();
             CameraObject = _cinemachineCamera.gameObject;
-            _composer = _cinemachineCamera.GetComponent<CinemachinePositionComposer>();
-            _cinemachineCamera.LookAt = _playerService.PlayerTransform;
-            _cinemachineCamera.Follow = _playerService.PlayerTransform;
+            _thirdPersonFollow = _cinemachineCamera.GetComponent<CinemachineThirdPersonFollow>();
+
+            _cameraTarget = new GameObject("CameraTarget").transform;
+            _cameraTarget.SetParent(_playerService.PlayerTransform);
+            
+            _cameraTarget.localPosition = new Vector3(0, 1.4f, 0); 
+
+            _cinemachineCamera.Target.TrackingTarget = _cameraTarget;
         }
 
         public void ChangeDistance(float newDistance)
         {
-            _composer.CameraDistance = newDistance;
-            
-            if (_cinemachineCamera.Lens.Orthographic)
+            if (_thirdPersonFollow != null)
             {
-                _cinemachineCamera.Lens.OrthographicSize = newDistance;
+                _thirdPersonFollow.CameraDistance = newDistance;
             }
         }
 
-        public void SetRotationAngle(float newAngle)
+        public void SetRotationAngle(Vector2 deltaRotation)
         {
-            if (Mathf.Approximately(newAngle, _currentAngle)) return;
-            _currentAngle = newAngle;
-            _currentRotation = Quaternion.Euler(0, newAngle, 0);
+            if (deltaRotation == Vector2.zero) return;
+
+            _currentRotation += deltaRotation;
+            
+            _currentRotation.x %= 360f;
+            _currentRotation.y = Mathf.Clamp(_currentRotation.y, -70f, 70f);
+
+            _cameraTarget.localRotation = Quaternion.Euler(_currentRotation.y, 0, 0);
+
             CameraRotationChanged?.Invoke();
         }
 
-        public Quaternion GetCameraRotation() => _currentRotation;
-        public float GetCameraAngle() => _currentAngle;
+        public Quaternion GetCameraRotation() => _cameraTarget.rotation;
+        public Vector2 GetCameraAngle() => _currentRotation;
     }
 }

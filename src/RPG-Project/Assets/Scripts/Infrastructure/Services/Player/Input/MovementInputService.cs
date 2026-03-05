@@ -1,7 +1,6 @@
+using Features.Player;
 using Infrastructure.Services.Player.Animator;
 using Input.PlayerInput;
-using MonoBehaviours.Player;
-using prototype_Roma.Scripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -20,7 +19,7 @@ namespace Infrastructure.Services.Player.Input
         private readonly IPlayerService _playerService;
         private readonly IPlayerAnimatorService _playerAnimatorService;
 
-        private PlayerMovementBehaviour _playerMovement;
+        private PlayerMovement _playerMovement;
 
         public MovementInputService(InputManager inputManager, IPlayerService playerService,
             IPlayerAnimatorService playerAnimatorService)
@@ -34,7 +33,7 @@ namespace Infrastructure.Services.Player.Input
         {
             CanMove = true;
 
-            _playerMovement = _playerService.PlayerObject.GetComponent<PlayerMovementBehaviour>();
+            _playerMovement = _playerService.PlayerObject.GetComponent<PlayerMovement>();
             
             _inputManager.Actions.Move += OnMove;
 

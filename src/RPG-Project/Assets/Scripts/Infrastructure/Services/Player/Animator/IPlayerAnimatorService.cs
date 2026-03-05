@@ -19,6 +19,7 @@ namespace Infrastructure.Services.Player.Animator
         public void TriggerHit();
         public void TriggerDeath();
         public void ChangeMoveSpeed(float newSpeed);
+        void SetTurnValue(float value);
         public void SetMoveVector(Vector2 vector);
         void ProcessAnimationEvent(string eventId);
         

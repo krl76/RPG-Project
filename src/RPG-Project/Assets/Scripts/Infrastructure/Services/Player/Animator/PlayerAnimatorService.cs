@@ -34,6 +34,8 @@ namespace Infrastructure.Services.Player.Animator
         private readonly int _moveX = UnityEngine.Animator.StringToHash("moveX");
         private readonly int _moveY = UnityEngine.Animator.StringToHash("moveY");
         
+        private readonly int _turn = UnityEngine.Animator.StringToHash("Turn");
+        
         #endregion
         
         #region Private Fields
@@ -89,6 +91,11 @@ namespace Infrastructure.Services.Player.Animator
             _animator.SetBool(_isFalling, state);
         }
 
+        public void SetTurnValue(float value)
+        {
+            _animator.SetFloat(_turn, value);
+        }
+
         public void TriggerJump(bool isTrigger = true)
         {
             if (isTrigger) _animator.SetTrigger(_jump);
@@ -127,7 +134,7 @@ namespace Infrastructure.Services.Player.Animator
         private void ChangeMoveSpeedJump()
         {
             float jumpSpeed;
-            if (_currentMoveSpeed <= 2 || !_isMovingCheck) jumpSpeed = 0; // меняем значения
+            if (_currentMoveSpeed <= 2 || !_isMovingCheck) jumpSpeed = 0;
             else if (_currentMoveSpeed >= 4) jumpSpeed = 1;
             else jumpSpeed = (_currentMoveSpeed - 2) / 2;
             _animator.SetFloat(_moveSpeedJump, jumpSpeed);

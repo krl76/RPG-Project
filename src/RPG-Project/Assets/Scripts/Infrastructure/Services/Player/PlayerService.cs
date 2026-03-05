@@ -1,4 +1,4 @@
-using MonoBehaviours.Player;
+using Features.Player;
 using prototype_Roma.Scripts;
 using UnityEngine;
 
@@ -11,7 +11,7 @@ namespace Infrastructure.Services.Player
         
         public void InstallService()
         {
-            PlayerObject = Object.FindAnyObjectByType<PlayerMovementBehaviour>().gameObject;
+            PlayerObject = Object.FindAnyObjectByType<PlayerMovement>().gameObject;
             PlayerTransform = PlayerObject.transform;
         }
     }

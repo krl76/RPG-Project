@@ -2,11 +2,11 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data.Configs;
+using Features.Player;
 using Infrastructure.Providers.Configs;
 using Infrastructure.Services.Camera;
 using Infrastructure.Services.Player.Animator;
 using Input.PlayerInput;
-using MonoBehaviours.Player;
 using UnityEngine;
 
 namespace Infrastructure.Services.Player.Input
@@ -18,7 +18,7 @@ namespace Infrastructure.Services.Player.Input
         private bool _isAiming;
         private CancellationTokenSource _cancellationTokenSource;
 
-        private PlayerMovementBehaviour _movement;
+        private PlayerMovement _movement;
         private PlayerStatsConfig _config;
 
         private readonly InputManager _inputManager;
@@ -45,7 +45,7 @@ namespace Infrastructure.Services.Player.Input
         
         public void InstallService()
         {
-            _movement = _playerService.PlayerObject.GetComponent<PlayerMovementBehaviour>();
+            _movement = _playerService.PlayerObject.GetComponent<PlayerMovement>();
             
             _config = _configDataProvider.GetPlayerStatsConfig();
             _animatorService.SetFightInputService(this);
