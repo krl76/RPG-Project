@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Data.Configs;
 using Data.Paths;
 using Infrastructure.Services.UI;
@@ -10,16 +11,19 @@ namespace Infrastructure.Providers.Configs
     {
         private WindowsConfig _windowsConfig;
         private PlayerStatsConfig _playerStatsConfig;
+        private Dictionary<int, EnemyConfig> _enemies;
 
         public void Load()
         {
             _windowsConfig = Resources.LoadAll<WindowsConfig>(ConfigPaths.WINDOWS_CONFIG_PATH).FirstOrDefault();
-            if (_windowsConfig == null) Debug.LogError("[ConfigDataProvider] WindowsConfig not found!");
             
             _playerStatsConfig = Resources.LoadAll<PlayerStatsConfig>(ConfigPaths.PLAYERSTATS_CONFIG_PATH).FirstOrDefault();
-            if (_playerStatsConfig == null) Debug.LogError("[ConfigDataProvider] PlayerStatsConfig not found!");
-
+            
+            _enemies = Resources.LoadAll<EnemyConfig>(ConfigPaths.ENEMIES_CONFIG_PATH)
+                .ToDictionary(x => x.Id, x => x);
+            
             Debug.Log($"[ConfigDataProvider] Loaded {_windowsConfig.windows.Count} UI windows.");
+            Debug.Log($"[ConfigDataProvider] Loaded {_enemies.Values.Count} enemies.");
         }
 
         public GameObject GetWindowPrefab(WindowID id)
@@ -29,5 +33,6 @@ namespace Infrastructure.Providers.Configs
         }
 
         public PlayerStatsConfig GetPlayerStatsConfig() => _playerStatsConfig;
+        public EnemyConfig GetEnemyConfig(int id) => _enemies.TryGetValue(id, out var config) ? config : null;
     }
 }

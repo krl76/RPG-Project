@@ -129,13 +129,11 @@ namespace Features.Player
             _cameraService.CameraRotationChanged += ChangePlayerRotation;
 
             _playerDamageable = GetComponent<PlayerHealth>();
-            _playerDamageable.OnHealthChanged += Hit;
         }
 
         private void OnDisable()
         {
             _cameraService.CameraRotationChanged -= ChangePlayerRotation;
-            _playerDamageable.OnHealthChanged -= Hit;
         }
 
 

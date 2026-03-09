@@ -9,5 +9,6 @@ namespace Infrastructure.Providers.Configs
         void Load();
         GameObject GetWindowPrefab(WindowID id);
         PlayerStatsConfig GetPlayerStatsConfig();
+        EnemyConfig GetEnemyConfig(int id);
     }
 }

@@ -5,6 +5,7 @@ using Data.Configs;
 using Features.Player;
 using Infrastructure.Providers.Configs;
 using Infrastructure.Services.Camera;
+using Infrastructure.Services.Events;
 using Infrastructure.Services.Player.Animator;
 using Input.PlayerInput;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace Infrastructure.Services.Player.Input
     public class FightInputService : IFightInputService
     {
         private bool _isAttackStarted = false;
-        private bool _isMagicAttackAvailible = true;
+        private bool _isMagicAttackAvailable = true;
         private bool _isAiming;
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -46,14 +47,14 @@ namespace Infrastructure.Services.Player.Input
         public void InstallService()
         {
             _movement = _playerService.PlayerObject.GetComponent<PlayerMovement>();
-            
             _config = _configDataProvider.GetPlayerStatsConfig();
+            
             _animatorService.SetFightInputService(this);
             
             _inputManager.Actions.SwordAttack += OnPhysicalAttack;
             _inputManager.Actions.MagicAttack += OnGrabGun;
             _inputManager.Actions.SwordAttack += OnMagicAttack; 
-            
+
             _animatorService.OnGrabGunEnded += AttackEnd;
             _animatorService.OnAttackEnded += AttackEnd;
         }
@@ -82,7 +83,7 @@ namespace Infrastructure.Services.Player.Input
         
         private void OnPhysicalAttack()
         {
-            if (_isAiming) return; 
+            if (_isAiming) return;
             if (!AttackStart()) return;
             
             _animatorService.TriggerPhysicalAttack();
@@ -90,7 +91,7 @@ namespace Infrastructure.Services.Player.Input
         
         private void OnGrabGun()
         {
-            if (_isAiming || !_isMagicAttackAvailible) return;
+            if (_isAiming || !_isMagicAttackAvailable) return;
             if (!AttackStart()) return;
             
             _isAiming = true;
@@ -102,33 +103,37 @@ namespace Infrastructure.Services.Player.Input
             if (!_isAiming) return;
             
             _isAiming = false;
-            _isMagicAttackAvailible = false;
             
+            _cancellationTokenSource?.Cancel();
             _cancellationTokenSource = new CancellationTokenSource();
             WaitMagicCooldown(_cancellationTokenSource).Forget();
             
             _animatorService.TriggerMagicAttack();
-
-            // TODO: Вызвать логику Raycast/Spawn пули
         }
 
         private bool AttackStart()
         {
             if (_isAttackStarted || _movement.IsFalling) return false;
+            
             _isAttackStarted = true;
             _movementInputService.MoveVector = Vector2.zero;
             _movementInputService.IsMoving = false;
             _movementInputService.CanMove = false;
+            
             return true;
         }
 
-        private async UniTask WaitMagicCooldown(CancellationTokenSource cancellationTokenSource)
+        private async UniTask WaitMagicCooldown(CancellationTokenSource cts)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(_config.MagicAttackCooldown), 
-                ignoreTimeScale: false, 
-                PlayerLoopTiming.Update, 
-                cancellationTokenSource.Token);
-            _isMagicAttackAvailible = true;
+            _isMagicAttackAvailable = false;
+
+            EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicUsed(_config.MagicAttackCooldown));
+
+            bool isCancelled = await UniTask.Delay(TimeSpan.FromSeconds(_config.MagicAttackCooldown), cancellationToken: cts.Token).SuppressCancellationThrow();
+            if (isCancelled) return;
+
+            _isMagicAttackAvailable = true;
+            EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicReady());
         }
     }
 }

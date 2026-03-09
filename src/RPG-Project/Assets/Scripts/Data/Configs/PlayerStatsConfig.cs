@@ -9,6 +9,8 @@ namespace Data.Configs
         public float InitialHealth = 100;
 
         [Header("Attack stats")]
+        public float PhysicalDamage = 25f;
+        public float MeleeHitRadius = 0.6f;
         public float MagicAttackCooldown = 2f;
 
         [Header("Movement stats")] 
