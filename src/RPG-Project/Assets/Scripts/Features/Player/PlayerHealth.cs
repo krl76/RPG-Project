@@ -17,14 +17,16 @@ namespace Features.Player
 
         private IConfigDataProvider _configDataProvider;
         private IPlayerAnimatorService _playerAnimatorService;
-
-
+        
         [Inject]
         private void Construct(IConfigDataProvider configDataProvider, IPlayerAnimatorService playerAnimatorService)
         {
             _configDataProvider = configDataProvider;
             _playerAnimatorService = playerAnimatorService;
+        }
 
+        private void Start()
+        {
             _maxHealth = _configDataProvider.GetPlayerStatsConfig().InitialHealth;
             _currentHealth = _maxHealth; //TODO: подгружать из сохранения
         }
@@ -32,7 +34,7 @@ namespace Features.Player
         public void TakeDamage(float amount)
         {
             if (!IsAlive) return;
-
+            
             _currentHealth = Mathf.Max(0, _currentHealth - amount);
 
             EventBus.RaiseEvent<IPlayerHealthSubscriber>(sub =>
@@ -46,6 +48,8 @@ namespace Features.Player
             {
                 _playerAnimatorService.TriggerDeath();
                 EventBus.RaiseEvent<IPlayerHealthSubscriber>(sub => sub.OnPlayerDied());
+                
+                EventBus.RaiseEvent<IGameStateSubscriber>(sub => sub.OnGameOver());
             }
         }
     }

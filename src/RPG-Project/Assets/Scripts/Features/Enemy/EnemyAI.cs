@@ -1,17 +1,19 @@
+using System;
 using Data.Configs;
 using Features.Combat;
 using Infrastructure.Factories.Objects;
+using Infrastructure.Services.Enemy;
 using Infrastructure.Services.Player;
 using UnityEngine;
 using UnityEngine.AI;
 using Zenject;
 
 namespace Features.Enemy
-{[RequireComponent(typeof(NavMeshAgent), typeof(Animator))]
+{[RequireComponent(typeof(NavMeshAgent), typeof(Animator), typeof(EnemyAnimation))]
     public class EnemyAI : MonoBehaviour, IDamageable
     {
         public bool IsAlive => _currentHealth > 0;
-        public EnemyConfig Config { get; private set; }
+        [field: SerializeField] public EnemyConfig Config;
 
         [Header("References")]
         [SerializeField] private Transform _meleeAttackPoint;
@@ -23,56 +25,70 @@ namespace Features.Enemy
         private Transform _playerTransform;
         
         private NavMeshAgent _agent;
-        private Animator _animator;
+        private EnemyAnimation _animator;
         private IHealthFeedback _healthFeedback;
         private IGameObjectFactory _gameObjectFactory;
+        private IEnemyService _enemyService;
+        private IPlayerService _playerService;
 
         [Inject]
-        private void Construct(IPlayerService playerService, IGameObjectFactory gameObjectFactory)
+        private void Construct(
+            IPlayerService playerService,
+            IGameObjectFactory gameObjectFactory,
+            IEnemyService enemyService)
         {
-            _playerTransform = playerService.PlayerTransform;
+            _playerService = playerService;
             _gameObjectFactory = gameObjectFactory;
+            _enemyService = enemyService;
         }
 
         private void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
-            _animator = GetComponent<Animator>();
-            _healthFeedback = GetComponent<IHealthFeedback>();
+            _animator = GetComponent<EnemyAnimation>();
+            _healthFeedback = GetComponentInChildren<IHealthFeedback>();
             
             _currentHealth = Config.MaxHealth;
+
+            _enemyService.Register(this);
+        }
+
+        private void Start()
+        {
+            _playerTransform = _playerService.PlayerTransform;
         }
 
         private void Update()
         {
-            if (!IsAlive || _playerTransform == null || Config == null) return;
-
+            if (!IsAlive) return;
+            
             float distanceToPlayer = Vector3.Distance(transform.position, _playerTransform.position);
-
+            
             if (distanceToPlayer <= Config.ChaseRange)
             {
                 if (distanceToPlayer <= Config.AttackRange)
                 {
                     _agent.isStopped = true;
-                    _animator.SetBool("isMoving", false);
+                    
+                    _animator.SetIsRunning(false);
                     LookAtPlayer();
-
+            
                     if (Time.time >= _lastAttackTime + Config.AttackCooldown)
                     {
                         Attack();
                     }
                 }
-                else
+                else if (distanceToPlayer >= Config.AttackRange + Config.AttackRange * 0.02)
                 {
                     _agent.isStopped = false;
                     _agent.SetDestination(_playerTransform.position);
-                    _animator.SetBool("isMoving", true);
+                    _animator.SetIsRunning(true);
                 }
             }
             else
             {
                 _agent.isStopped = true;
-                _animator.SetBool("isMoving", false);
+                _animator.SetIsRunning(false);
             }
         }
 
@@ -81,38 +97,39 @@ namespace Features.Enemy
             Vector3 direction = (_playerTransform.position - transform.position).normalized;
             direction.y = 0;
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction),
-                5f * Time.deltaTime);
+                3f * Time.deltaTime);
         }
 
         private void Attack()
         {
             _lastAttackTime = Time.time;
-            _animator.SetTrigger("Attack");
+            if (Config.Type == EnemyType.Melee)
+                _animator.PlayAttack();
+            else
+                _animator.PlayMagicAttack();
         }
 
-        public void OnAttackFrame()
+        public void OnPhysicalAttack() // ANIMATION EVENT
         {
-            if (Config.Type == EnemyType.Melee)
+            Collider[] hitColliders = Physics.OverlapSphere(_meleeAttackPoint.position,
+                Config.HitRadius, _playerLayer);
+
+            foreach (var hitCollider in hitColliders)
             {
-                if (_meleeAttackPoint == null) return;
-
-                Collider[] hitColliders = Physics.OverlapSphere(_meleeAttackPoint.position,
-                    Config.HitRadius, _playerLayer);
-
-                foreach (var hitCollider in hitColliders)
+                if (hitCollider.TryGetComponent<IDamageable>(out var victim) && victim.IsAlive)
                 {
-                    if (hitCollider.TryGetComponent<IDamageable>(out var victim) && victim.IsAlive)
-                    {
-                        victim.TakeDamage(Config.Damage);
+                    victim.TakeDamage(Config.Damage);
                     
-                        break; 
-                    }
+                    break; 
                 }
             }
-            else if (Config.Type == EnemyType.Ranged && Config.ProjectilePrefab != null)
-            {
-                _gameObjectFactory.Instantiate(Config.ProjectilePrefab, _shootPoint.position, transform.rotation); 
-            }
+        }
+
+        private void OnMagicAttack() // ANIMATION EVENT
+        {
+            var projectile = _gameObjectFactory
+                .Instantiate(Config.ProjectilePrefab, _shootPoint.position, transform.rotation);
+            projectile.GetComponent<MagicProjectile>().Setup(Config.Damage, Config.ProjectileSpeed);
         }
 
         public void TakeDamage(float amount)
@@ -122,15 +139,17 @@ namespace Features.Enemy
             _currentHealth -= amount;
             
             _healthFeedback.OnHealthChanged(_currentHealth, Config.MaxHealth);
-            
-            _animator.SetTrigger("Hit");
 
             if (_currentHealth <= 0)
             {
                 _agent.isStopped = true;
-                _animator.SetTrigger("Die");
+                _animator.PlayDeath();
                 GetComponent<Collider>().enabled = false;
                 Destroy(gameObject, 3f);
+            }
+            else
+            {
+                _animator.PlayHit();
             }
         }
     }

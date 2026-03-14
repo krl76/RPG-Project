@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using SimpleAssets.Common.Animation;
-using SimpleAssets.Common.Utils;
 using UnityEngine;
 
-namespace SimpleAssets.Common.Character
+namespace Features.Enemy
 {
     [RequireComponent(typeof(Animator))]
-    public class CharacterAnimation : MonoBehaviour
+    public class EnemyAnimation : MonoBehaviour
     {
         private static readonly int MoveSpeedHash = Animator.StringToHash(AnimationID.WALK_SPEED);
         private static readonly int RunSpeedHash = Animator.StringToHash(AnimationID.RUN_SPEED);
@@ -18,10 +16,12 @@ namespace SimpleAssets.Common.Character
         private static readonly int RunHash = Animator.StringToHash(AnimationID.RUN);
         private static readonly int IdleHash = Animator.StringToHash(AnimationID.IDLE);
         private static readonly int AttackHash = Animator.StringToHash(AnimationID.ATTACK);
+        private static readonly int MagicAttackHash = Animator.StringToHash(AnimationID.MAGIC_ATTACK);
+        private static readonly int HitHash = Animator.StringToHash(AnimationID.HIT);
+        private static readonly int DeathHash = Animator.StringToHash(AnimationID.DEATH);
 
         public event Action OnAttackReachEnd;
         public event Action OnAttackExit;
-        public event Action OnDamageTrigger;
 
         private Animator Animator { get; set; }
         private Dictionary<string, AnimationStateMachine> States { get; set; }
@@ -57,15 +57,14 @@ namespace SimpleAssets.Common.Character
             }
         }
 
-        // play behavior
-        public void PlayWalk()
+        public void SetIsWalking(bool isWalking)
         {
-            Animator.SetTrigger(WalkHash);
+            Animator.SetBool(WalkHash, isWalking);
         }
         
-        public void PlayRun()
+        public void SetIsRunning(bool isRunning)
         {
-            Animator.SetTrigger(RunHash);
+            Animator.SetBool(RunHash, isRunning);
         }
         
         public void PlayIdle()
@@ -75,12 +74,24 @@ namespace SimpleAssets.Common.Character
 
         public void PlayAttack()
         {
-            /*if (gameObject.name == "Ghoul-Blue (Action RPG Player)(Clone)")
-                Debug.Log("PlayAttack");*/
             Animator.SetTrigger(AttackHash);
         }
+        
+        public void PlayMagicAttack()
+        {
+            Animator.SetTrigger(MagicAttackHash);
+        }
 
-        // speed beahavior
+        public void PlayHit()
+        {
+            Animator.SetTrigger(HitHash);
+        }
+
+        public void PlayDeath()
+        {
+            Animator.SetTrigger(DeathHash);
+        }
+
         public void SetWalkSpeed(float speed)
         {
             Animator.SetFloat(MoveSpeedHash, speed);
@@ -96,7 +107,6 @@ namespace SimpleAssets.Common.Character
             Animator.SetFloat(AttackSpeedHash, speed);
         }
 
-        // reset behavoir
         public void ResetIdleTrigger()
         {
             Animator.ResetTrigger(IdleHash);
@@ -117,7 +127,6 @@ namespace SimpleAssets.Common.Character
             Animator.ResetTrigger(WalkHash);
         }
         
-        // animation events
         private void AttackAnimationExit()
         {
             OnAttackExit?.Invoke();
@@ -126,11 +135,6 @@ namespace SimpleAssets.Common.Character
         private void AttackAnimationReachEnd()
         {
             OnAttackReachEnd?.Invoke();
-        }
-        
-        private void DamageTrigger()
-        {
-            OnDamageTrigger?.Invoke();
         }
     }
 }

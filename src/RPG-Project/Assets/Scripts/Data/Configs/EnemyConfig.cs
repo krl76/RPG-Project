@@ -24,6 +24,7 @@ namespace Data.Configs
 
         [Header("Ranged specific")]
         public GameObject ProjectilePrefab;
+        public float ProjectileSpeed = 20f;
 
 #if UNITY_EDITOR
         private void Reset()

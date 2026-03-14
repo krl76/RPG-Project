@@ -27,5 +27,6 @@ namespace Infrastructure.Services.Player.Animator
         event Action OnGrabGunEnded;
         event Action OnAttackEnded;
         event Action OnShootEnded;
+        event Action OnPhysicalAttack;
     }
 }

@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: PlayerStatsConfig
   m_EditorClassIdentifier: Assembly-CSharp::Data.Configs.PlayerStatsConfig
   InitialHealth: 100
+  PhysicalDamage: 50
+  MeleeHitRadius: 0.6
   MagicAttackCooldown: 2
   MoveSpeedCoef: 3.5
   WalkSpeed: 3

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8f4ddc8ddd749c6917ff34622edfa05, type: 3}
+  m_Name: RangedEnemy
+  m_EditorClassIdentifier: Assembly-CSharp::Data.Configs.EnemyConfig
+  Id: 2
+  Type: 1
+  MaxHealth: 50
+  Damage: 30
+  ChaseRange: 15
+  AttackRange: 8
+  AttackCooldown: 5
+  HitRadius: 0.5
+  ProjectilePrefab: {fileID: 3006659048013178604, guid: 8ce934b3bc583b449af649a274207705, type: 3}
+  ProjectileSpeed: 20

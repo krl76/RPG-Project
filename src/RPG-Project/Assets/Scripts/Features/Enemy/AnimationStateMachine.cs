@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace SimpleAssets.Common.Animation
+namespace Features.Enemy
 {
     public class AnimationStateMachine : StateMachineBehaviour
     {

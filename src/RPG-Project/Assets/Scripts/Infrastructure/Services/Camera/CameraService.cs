@@ -1,4 +1,5 @@
 using System;
+using Infrastructure.Services.Events;
 using Infrastructure.Services.Player;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -17,6 +18,8 @@ namespace Infrastructure.Services.Camera
         
         private CinemachineCamera _cinemachineCamera;
         private CinemachineThirdPersonFollow _thirdPersonFollow;
+
+        private bool _enabled = true;
 
         private readonly IPlayerService _playerService;
 

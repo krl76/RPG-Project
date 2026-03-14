@@ -4,15 +4,16 @@ using Data.Configs;
 using Data.Paths;
 using Infrastructure.Services.UI;
 using UnityEngine;
+using Zenject;
 
 namespace Infrastructure.Providers.Configs
 {
-    public class ConfigDataProvider : IConfigDataProvider
+    public class ConfigDataProvider : IConfigDataProvider, IInitializable
     {
         private WindowsConfig _windowsConfig;
         private PlayerStatsConfig _playerStatsConfig;
         private Dictionary<int, EnemyConfig> _enemies;
-
+        public void Initialize() => Load();
         public void Load()
         {
             _windowsConfig = Resources.LoadAll<WindowsConfig>(ConfigPaths.WINDOWS_CONFIG_PATH).FirstOrDefault();

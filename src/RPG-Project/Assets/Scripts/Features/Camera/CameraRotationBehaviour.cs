@@ -1,11 +1,12 @@
 using Infrastructure.Services.Camera;
+using Infrastructure.Services.Events;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Zenject;
 
 namespace Features.Camera
 {
-    public class CameraRotationBehaviour : MonoBehaviour
+    public class CameraRotationBehaviour : MonoBehaviour, IGameStateSubscriber
     {
         [SerializeField] private float _sensitivity = 20f;
         
@@ -37,10 +38,15 @@ namespace Features.Camera
             }
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+        }
+
+        public void OnGameOver()
+        {
+            gameObject.SetActive(false);
         }
     }
 }

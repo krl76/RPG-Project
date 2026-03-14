@@ -12,6 +12,7 @@ namespace Infrastructure.Services.Player.Animator
         public event Action OnGrabGunEnded;
         public event Action OnShootEnded;
         public event Action OnAttackEnded;
+        public event Action OnPhysicalAttack;
         
         #endregion
         
@@ -155,6 +156,9 @@ namespace Infrastructure.Services.Player.Animator
                     break;
                 case "ShootEnded":
                     OnShootEnded?.Invoke();
+                    break;
+                case "PhysicalAttack":
+                    OnPhysicalAttack?.Invoke();
                     break;
             }
         }

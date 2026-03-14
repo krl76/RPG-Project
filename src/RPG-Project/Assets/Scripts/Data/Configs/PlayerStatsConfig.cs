@@ -10,8 +10,11 @@ namespace Data.Configs
 
         [Header("Attack stats")]
         public float PhysicalDamage = 25f;
+
+        public float MagicDamage = 40f;
         public float MeleeHitRadius = 0.6f;
         public float MagicAttackCooldown = 2f;
+        public float ProjectileSpeed = 25f;
 
         [Header("Movement stats")] 
         public float MoveSpeedCoef = 10f;

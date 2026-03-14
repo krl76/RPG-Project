@@ -1,13 +1,16 @@
+using System;
 using Data.Configs;
 using Features.Combat;
 using Infrastructure.Factories.Objects;
 using Infrastructure.Providers.Configs;
+using Infrastructure.Services.Events;
+using Infrastructure.Services.Player.Animator;
 using UnityEngine;
 using Zenject;
 
 namespace Features.Player
 {
-    public class PlayerCombat : MonoBehaviour
+    public class PlayerCombat : MonoBehaviour, IPlayerMagicSubscriber
     {
         [Header("Physical Attack")]
         [SerializeField] private Transform _meleeAttackPoint; 
@@ -18,46 +21,59 @@ namespace Features.Player
         [SerializeField] private Transform _shootPoint;
 
         private IGameObjectFactory _gameObjectFactory;
-        private PlayerStatsConfig _config;
+        private IPlayerAnimatorService _animator;
+        private IConfigDataProvider _configDataProvider;
 
         [Inject]
-        private void Construct(IGameObjectFactory gameObjectFactory, IConfigDataProvider configDataProvider)
+        private void Construct(
+            IGameObjectFactory gameObjectFactory,
+            IConfigDataProvider configDataProvider,
+            IPlayerAnimatorService playerAnimatorService)
         {
             _gameObjectFactory = gameObjectFactory;
-            _config = configDataProvider.GetPlayerStatsConfig();
+            _configDataProvider = configDataProvider;
+            _animator = playerAnimatorService;
         }
 
-        public void ExecutePhysicalHit()
+        private void Start()
         {
-            if (_meleeAttackPoint == null) return;
+            _animator.OnPhysicalAttack += PhysicalAttack;
+        }
 
-            Collider[] hitColliders = Physics.OverlapSphere(_meleeAttackPoint.position, _config.MeleeHitRadius, _enemyLayer);
+        private void OnDestroy()
+        {
+            _animator.OnPhysicalAttack -= PhysicalAttack;
+        }
+
+        private void PhysicalAttack()
+        {
+            var config = _configDataProvider.GetPlayerStatsConfig();
+            
+            Collider[] hitColliders = Physics.OverlapSphere(_meleeAttackPoint.position, config.MeleeHitRadius, _enemyLayer);
 
             foreach (var hitCollider in hitColliders)
             {
                 if (hitCollider.TryGetComponent<IDamageable>(out var victim) && victim.IsAlive)
                 {
-                    victim.TakeDamage(_config.PhysicalDamage);
+                    victim.TakeDamage(config.PhysicalDamage);
                     
                     break; 
                 }
             }
         }
 
-        public void ExecuteMagicShoot()
+        public void OnMagicUsed(float cooldownDuration)
         {
-            if (_magicProjectilePrefab != null && _shootPoint != null)
-            {
-                _gameObjectFactory.Instantiate(_magicProjectilePrefab, _shootPoint.position, transform.rotation);
-            }
+            var config = _configDataProvider.GetPlayerStatsConfig();
+            
+            var projectile = _gameObjectFactory
+                .Instantiate(_magicProjectilePrefab, _shootPoint.position, transform.rotation);
+            projectile.GetComponent<MagicProjectile>().Setup(config.MagicDamage, config.ProjectileSpeed);
         }
 
-        private void OnDrawGizmosSelected()
+        public void OnMagicReady()
         {
-            if (_meleeAttackPoint == null || _config == null) return;
-            
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(_meleeAttackPoint.position, _config.MeleeHitRadius);
+            // заглушка из-за наследования подписчика
         }
     }
 }
