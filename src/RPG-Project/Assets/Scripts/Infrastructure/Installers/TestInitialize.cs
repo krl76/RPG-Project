@@ -18,7 +18,7 @@ using Zenject;
 namespace Infrastructure.Installers
 {
     
-    [UsedImplicitly]
+    [UsedImplicitly] 
     public class TestInitialize : IInitializable, IGameStateSubscriber
 
     {
@@ -73,6 +73,10 @@ namespace Infrastructure.Installers
         public void OnGameOver()
         {
             //
+            _fightInputService.UninstallService();
+            _movementInputService.UninstallService();
+
+            _playerAnimatorService.UninstallService();
         }
 
         public async void OnGameRestarted()
@@ -83,7 +87,7 @@ namespace Infrastructure.Installers
             
             await _sceneLoaderService.LoadSceneAsync("Game", LoadSceneMode.Single);
 
-            await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+            await UniTask.DelayFrame(2); // ожидание повторной инициализации
             
             InitializeServices();
             

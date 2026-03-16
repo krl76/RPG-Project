@@ -59,10 +59,19 @@ namespace Infrastructure.Services.Player.Animator
         {
             _playerService = playerService;
         }
+
+        public bool IsInitilized { get; set; } = false;
         
+
         public void InstallService()
         {
             _animator = _playerService.PlayerObject.GetComponent<UnityEngine.Animator>();
+            IsInitilized = true;
+        }
+
+        public void UninstallService()
+        {
+            IsInitilized = false;
         }
 
         public void SetFightInputService(IFightInputService fightInputService)

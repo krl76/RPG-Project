@@ -131,9 +131,8 @@ namespace Infrastructure.Services.Player.Input
             EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicUsed(_config.MagicAttackCooldown));
 
             bool isCancelled = await UniTask.Delay(TimeSpan.FromSeconds(_config.MagicAttackCooldown), cancellationToken: cts.Token).SuppressCancellationThrow();
-            if (isCancelled) return;
-
             _isMagicAttackAvailable = true;
+            if (isCancelled) return;
             EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicReady());
         }
     }

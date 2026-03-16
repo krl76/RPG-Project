@@ -6,7 +6,9 @@ namespace Infrastructure.Services.Player.Animator
 {
     public interface IPlayerAnimatorService
     {
+        public bool IsInitilized { get; set; }
         public void InstallService();
+        public void UninstallService();
         public void SetFightInputService(IFightInputService fightInputService);
         public void ResetTriggersByHit();
         public void SetMoveBool(bool state);

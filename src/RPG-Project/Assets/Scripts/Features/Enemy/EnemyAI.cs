@@ -62,7 +62,12 @@ namespace Features.Enemy
 
         private void Update()
         {
-            if (!IsAlive || !_playerTransform) return;
+            if (!IsAlive) return;
+            if (!_playerTransform)
+            {
+                if (!_playerService.PlayerTransform) return;
+                _playerTransform = _playerService.PlayerTransform;
+            }
             
             float distanceToPlayer = Vector3.Distance(transform.position, _playerTransform.position);
             

@@ -81,11 +81,10 @@ namespace Features.Player
 
         private void Start() // delete when proper bootstrap setup
         {
-            if (_playerService == null) ProjectContext.Instance.Container.Resolve<IPlayerService>();
-            if (_cameraService == null) ProjectContext.Instance.Container.Resolve<ICameraService>();
-            if (_configDataProvider == null) ProjectContext.Instance.Container.Resolve<IConfigDataProvider>();
-            if (_animator == null) ProjectContext.Instance.Container.Resolve<IPlayerAnimatorService>();
-
+            // if (_playerService == null) ProjectContext.Instance.Container.Resolve<IPlayerService>();
+            // if (_cameraService == null) ProjectContext.Instance.Container.Resolve<ICameraService>();
+            // if (_configDataProvider == null) ProjectContext.Instance.Container.Resolve<IConfigDataProvider>();
+            // if (_animator == null) ProjectContext.Instance.Container.Resolve<IPlayerAnimatorService>();
             _config = _configDataProvider?.GetPlayerStatsConfig();
         }
 
@@ -144,7 +143,7 @@ namespace Features.Player
 
         private void Update()
         {
-            if (_animator == null) return;
+            if (_animator.IsInitilized == false ) return;
             
             UpdateTimers();
             
