@@ -81,10 +81,6 @@ namespace Features.Player
 
         private void Start() // delete when proper bootstrap setup
         {
-            // if (_playerService == null) ProjectContext.Instance.Container.Resolve<IPlayerService>();
-            // if (_cameraService == null) ProjectContext.Instance.Container.Resolve<ICameraService>();
-            // if (_configDataProvider == null) ProjectContext.Instance.Container.Resolve<IConfigDataProvider>();
-            // if (_animator == null) ProjectContext.Instance.Container.Resolve<IPlayerAnimatorService>();
             _config = _configDataProvider?.GetPlayerStatsConfig();
         }
 
@@ -156,7 +152,7 @@ namespace Features.Player
 
             if (inputMove.sqrMagnitude > 0.01f) 
             {
-                inputMove = inputMove.normalized; 
+                inputMove = inputMove.normalized;
             }
 
             float safeCurrentSpeed = Mathf.Clamp(_currentMoveSpeed, _config.WalkSpeed, _config.RunSpeed);

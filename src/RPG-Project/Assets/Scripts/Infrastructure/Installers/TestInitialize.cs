@@ -72,7 +72,6 @@ namespace Infrastructure.Installers
 
         public void OnGameOver()
         {
-            //
             _fightInputService.UninstallService();
             _movementInputService.UninstallService();
 
@@ -90,8 +89,6 @@ namespace Infrastructure.Installers
             await UniTask.DelayFrame(2); // ожидание повторной инициализации
             
             InitializeServices();
-            
-            Debug.Log("initialized");
         }
     }
 }

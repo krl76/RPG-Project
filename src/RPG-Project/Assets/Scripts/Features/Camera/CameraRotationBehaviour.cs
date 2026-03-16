@@ -23,8 +23,6 @@ namespace Features.Camera
             EventBus.Subscribe(this);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-
-            if (_cameraService == null) ProjectContext.Instance.Container.Resolve<ICameraService>();
         }
 
         private void LateUpdate()

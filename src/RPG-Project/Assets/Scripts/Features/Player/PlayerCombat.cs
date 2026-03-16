@@ -39,9 +39,6 @@ namespace Features.Player
         {
             EventBus.Subscribe(this);
             _animator.OnPhysicalAttack += PhysicalAttack;
-
-            if (_gameObjectFactory == null) ProjectContext.Instance.Container.Resolve<IGameObjectFactory>();
-            if (_configDataProvider == null) ProjectContext.Instance.Container.Resolve<IConfigDataProvider>();
         }
 
         private void OnDestroy()

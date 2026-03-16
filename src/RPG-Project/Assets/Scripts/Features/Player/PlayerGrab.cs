@@ -49,7 +49,6 @@ namespace Features.Player
 
         private void Start()
         {
-            if (_playerAnimatorService == null) ProjectContext.Instance.Container.Resolve<IPlayerAnimatorService>(); 
             _playerAnimatorService.OnGrabGun += GrabGun;
             _playerAnimatorService.OnGrabGun += EnableAiming;
 
