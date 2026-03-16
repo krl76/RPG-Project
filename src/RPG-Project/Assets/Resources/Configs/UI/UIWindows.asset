@@ -12,4 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bca754fc3a794a48865846add4379e7d, type: 3}
   m_Name: UIWindows
   m_EditorClassIdentifier: Assembly-CSharp::Data.Configs.WindowsConfig
-  windows: []
+  windows:
+  - windowID: 1
+    prefab: {fileID: 1693735868600323657, guid: df7d8a0719bf6114a9150e9fdccf5df5, type: 3}
+  - windowID: 2
+    prefab: {fileID: 5413449043711951050, guid: 31d9a3ab027b0ce479f881866c52efd2, type: 3}

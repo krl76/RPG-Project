@@ -17,7 +17,8 @@ MonoBehaviour:
   MaxHealth: 100
   Damage: 15
   ChaseRange: 15
-  AttackRange: 3
+  AttackRange: 2
   AttackCooldown: 4
   HitRadius: 0.5
   ProjectilePrefab: {fileID: 0}
+  ProjectileSpeed: 20

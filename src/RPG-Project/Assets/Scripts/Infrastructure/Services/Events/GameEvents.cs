@@ -15,5 +15,6 @@ namespace Infrastructure.Services.Events
     public interface IGameStateSubscriber : IGlobalSubscriber
     {
         void OnGameOver();
+        void OnGameRestarted();
     }
 }

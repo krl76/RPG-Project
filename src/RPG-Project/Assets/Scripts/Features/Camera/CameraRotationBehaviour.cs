@@ -20,8 +20,11 @@ namespace Features.Camera
 
         private void Start()
         {
+            EventBus.Subscribe(this);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+
+            if (_cameraService == null) ProjectContext.Instance.Container.Resolve<ICameraService>();
         }
 
         private void LateUpdate()
@@ -40,6 +43,7 @@ namespace Features.Camera
 
         private void OnDisable()
         {
+            EventBus.Unsubscribe(this);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
@@ -47,6 +51,11 @@ namespace Features.Camera
         public void OnGameOver()
         {
             gameObject.SetActive(false);
+        }
+
+        public void OnGameRestarted()
+        {
+            //
         }
     }
 }

@@ -1,21 +1,22 @@
 ﻿using Infrastructure.Factories.UI;
-using Infrastructure.Providers;
 using Infrastructure.Providers.Configs;
+using Infrastructure.Services.Events;
 using UnityEngine;
 
 namespace Infrastructure.Services.UI
 {
-    public class WindowService : IWindowService
+    public class WindowService : IWindowService, IGameStateSubscriber
     {
         private readonly IUIFactory _uiFactory;
         private readonly IConfigDataProvider _configDataProvider;
-
+        
         public WindowService(
             IUIFactory uiFactory, 
             IConfigDataProvider configDataProvider)
         {
             _uiFactory = uiFactory;
             _configDataProvider = configDataProvider;
+            EventBus.Subscribe(this);
         }
 
         public bool IsWindowOpened(WindowID windowID) => 
@@ -44,5 +45,15 @@ namespace Infrastructure.Services.UI
 
         public void Close(WindowID windowID) => 
             _uiFactory.DestroyScreen(windowID);
+
+        public void OnGameOver()
+        {
+            Open(WindowID.GameOver);
+        }
+
+        public void OnGameRestarted()
+        {
+            //
+        }
     }
 }

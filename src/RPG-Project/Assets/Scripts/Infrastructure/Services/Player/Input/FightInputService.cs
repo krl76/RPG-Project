@@ -34,7 +34,8 @@ namespace Infrastructure.Services.Player.Input
             IMovementInputService movementInputService,
             ICameraService cameraService,
             IPlayerAnimatorService animatorService,
-            IConfigDataProvider configDataProvider)
+            IConfigDataProvider configDataProvider
+            )
         {
             _playerService = playerService;
             _inputManager = inputManager;
@@ -126,7 +127,7 @@ namespace Infrastructure.Services.Player.Input
         private async UniTask WaitMagicCooldown(CancellationTokenSource cts)
         {
             _isMagicAttackAvailable = false;
-
+            
             EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicUsed(_config.MagicAttackCooldown));
 
             bool isCancelled = await UniTask.Delay(TimeSpan.FromSeconds(_config.MagicAttackCooldown), cancellationToken: cts.Token).SuppressCancellationThrow();

@@ -22,7 +22,13 @@ namespace Infrastructure.Factories.Objects
             var containerToUse = container ?? _globalContainer;
             var obj = containerToUse.InstantiatePrefab(prefab, position ?? Vector3.zero,
                 rotation ?? Quaternion.identity, parentTransform: parent);
-
+            
+            if (parent == null)
+            {
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(obj, 
+                    UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            }
+            
             return Register(obj);
         }
 

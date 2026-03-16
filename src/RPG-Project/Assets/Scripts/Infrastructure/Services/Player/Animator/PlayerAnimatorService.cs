@@ -100,7 +100,7 @@ namespace Infrastructure.Services.Player.Animator
         public void TriggerJump(bool isTrigger = true)
         {
             if (isTrigger) _animator.SetTrigger(_jump);
-            else _animator.ResetTrigger(_jump);
+            else if (_animator) _animator.ResetTrigger(_jump);
         }
 
         public void TriggerLand() =>  _animator.SetTrigger(_land);

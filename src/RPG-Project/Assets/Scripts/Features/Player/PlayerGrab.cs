@@ -1,3 +1,4 @@
+using System;
 using Infrastructure.Services.Player.Animator;
 using UnityEngine;
 using Zenject;
@@ -44,7 +45,11 @@ namespace Features.Player
         private void Awake()
         {
             _pistol.gameObject.SetActive(false);
+        }
 
+        private void Start()
+        {
+            if (_playerAnimatorService == null) ProjectContext.Instance.Container.Resolve<IPlayerAnimatorService>(); 
             _playerAnimatorService.OnGrabGun += GrabGun;
             _playerAnimatorService.OnGrabGun += EnableAiming;
 

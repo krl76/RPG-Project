@@ -28,10 +28,14 @@ namespace Features.Combat
             }
         }
 
-        public void Setup(float damage, float speed)
+        public void Setup(float damage, float speed, float downwardTiltAngle = 0)
         {
             _damage = damage;
             _speed = speed;
+
+            if (downwardTiltAngle != 0)
+                transform.Rotate(Vector3.right, downwardTiltAngle);
+
             _isMoving = true;
 
             _rigidbody.isKinematic = true;

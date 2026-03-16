@@ -37,11 +37,16 @@ namespace Features.Player
 
         private void Start()
         {
+            EventBus.Subscribe(this);
             _animator.OnPhysicalAttack += PhysicalAttack;
+
+            if (_gameObjectFactory == null) ProjectContext.Instance.Container.Resolve<IGameObjectFactory>();
+            if (_configDataProvider == null) ProjectContext.Instance.Container.Resolve<IConfigDataProvider>();
         }
 
         private void OnDestroy()
         {
+            EventBus.Unsubscribe(this);
             _animator.OnPhysicalAttack -= PhysicalAttack;
         }
 
@@ -65,10 +70,9 @@ namespace Features.Player
         public void OnMagicUsed(float cooldownDuration)
         {
             var config = _configDataProvider.GetPlayerStatsConfig();
-            
             var projectile = _gameObjectFactory
                 .Instantiate(_magicProjectilePrefab, _shootPoint.position, transform.rotation);
-            projectile.GetComponent<MagicProjectile>().Setup(config.MagicDamage, config.ProjectileSpeed);
+            projectile.GetComponent<MagicProjectile>().Setup(config.MagicDamage, config.ProjectileSpeed, 15);
         }
 
         public void OnMagicReady()

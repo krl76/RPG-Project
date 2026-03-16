@@ -1,5 +1,6 @@
 using Infrastructure.Services.Events;
 using Infrastructure.Services.UI;
+using TMPro;
 using UI.Base;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +12,7 @@ namespace UI
         public override WindowID Id => WindowID.HUD;
 
         [SerializeField] private Slider _hpSlider;
-        [SerializeField] private Text _hpText;
+        [SerializeField] private TextMeshProUGUI _hpText;
         [SerializeField] private Image _magicIcon;
 
         private bool _isCooldownActive;
@@ -33,7 +34,7 @@ namespace UI
         public void OnPlayerHealthChanged(float currentHealth, float maxHealth)
         {
             _hpSlider.value = currentHealth / maxHealth;
-            if (_hpText != null) _hpText.text = $"{Mathf.CeilToInt(currentHealth)} / {maxHealth}";
+            _hpText.text = $"{Mathf.CeilToInt(currentHealth)} / {maxHealth}";
         }
 
         public void OnPlayerDied()
@@ -46,13 +47,13 @@ namespace UI
             _isCooldownActive = true;
             _cooldownTimer = 0f;
             _cooldownDuration = cooldownDuration;
-            if (_magicIcon != null) _magicIcon.fillAmount = 0f;
+            _magicIcon.fillAmount = 0f;
         }
 
         public void OnMagicReady()
         {
             _isCooldownActive = false;
-            if (_magicIcon != null) _magicIcon.fillAmount = 1f;
+            _magicIcon.fillAmount = 1f;
         }
 
         private void Update()

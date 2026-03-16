@@ -81,7 +81,12 @@ namespace Features.Player
 
         private void Start() // delete when proper bootstrap setup
         {
-            _config = _configDataProvider.GetPlayerStatsConfig();
+            if (_playerService == null) ProjectContext.Instance.Container.Resolve<IPlayerService>();
+            if (_cameraService == null) ProjectContext.Instance.Container.Resolve<ICameraService>();
+            if (_configDataProvider == null) ProjectContext.Instance.Container.Resolve<IConfigDataProvider>();
+            if (_animator == null) ProjectContext.Instance.Container.Resolve<IPlayerAnimatorService>();
+
+            _config = _configDataProvider?.GetPlayerStatsConfig();
         }
 
         public void OnJumpPressed()
@@ -139,6 +144,8 @@ namespace Features.Player
 
         private void Update()
         {
+            if (_animator == null) return;
+            
             UpdateTimers();
             
             if (_movementInput.IsMoving) _currentMovement = new Vector3(_rotatedMovement.x, _currentMovement.y, _rotatedMovement.y);

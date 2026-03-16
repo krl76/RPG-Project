@@ -27,6 +27,9 @@ namespace Features.Player
 
         private void Start()
         {
+            if (_configDataProvider == null) ProjectContext.Instance.Container.Resolve<IConfigDataProvider>();
+            if (_playerAnimatorService == null) ProjectContext.Instance.Container.Resolve<IPlayerAnimatorService>();
+            
             _maxHealth = _configDataProvider.GetPlayerStatsConfig().InitialHealth;
             _currentHealth = _maxHealth; //TODO: подгружать из сохранения
         }

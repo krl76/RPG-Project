@@ -55,12 +55,14 @@ namespace Features.Enemy
 
         private void Start()
         {
+            if (_playerService == null) ProjectContext.Instance.Container.Resolve<IPlayerService>();
+            
             _playerTransform = _playerService.PlayerTransform;
         }
 
         private void Update()
         {
-            if (!IsAlive) return;
+            if (!IsAlive || !_playerTransform) return;
             
             float distanceToPlayer = Vector3.Distance(transform.position, _playerTransform.position);
             

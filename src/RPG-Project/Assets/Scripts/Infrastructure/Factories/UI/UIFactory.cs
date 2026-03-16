@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Infrastructure.Factories.Objects;
 using Infrastructure.Services.UI;
+using UI.Base;
 using UnityEngine;
 
 namespace Infrastructure.Factories.UI
@@ -27,9 +28,11 @@ namespace Infrastructure.Factories.UI
 
             if (_screenInstances.TryAdd(windowId, instance))
             {
+                instance.GetComponent<WindowBase>().OnOpen();
+                
                 return instance;
             }
-
+            
             Object.Destroy(instance);
             return null;
         }
@@ -58,7 +61,7 @@ namespace Infrastructure.Factories.UI
                 Debug.LogWarning($"[UIFactory] Cannot destroy. Screen with WindowID {windowId} not found.");
                 return;
             }
-
+            
             _gameObjectFactory.Destroy(screenObject);
         }
 
