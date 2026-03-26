@@ -12,6 +12,7 @@ namespace Infrastructure.Providers.Configs
     {
         private WindowsConfig _windowsConfig;
         private PlayerStatsConfig _playerStatsConfig;
+        private CombatAudioConfig _combatAudioConfig;
         private Dictionary<int, EnemyConfig> _enemies;
         public void Initialize() => Load();
         public void Load()
@@ -19,6 +20,8 @@ namespace Infrastructure.Providers.Configs
             _windowsConfig = Resources.LoadAll<WindowsConfig>(ConfigPaths.WINDOWS_CONFIG_PATH).FirstOrDefault();
             
             _playerStatsConfig = Resources.LoadAll<PlayerStatsConfig>(ConfigPaths.PLAYERSTATS_CONFIG_PATH).FirstOrDefault();
+
+            _combatAudioConfig = Resources.LoadAll<CombatAudioConfig>(ConfigPaths.COMBAT_AUDIO_CONFIG_PATH).FirstOrDefault();
             
             _enemies = Resources.LoadAll<EnemyConfig>(ConfigPaths.ENEMIES_CONFIG_PATH)
                 .ToDictionary(x => x.Id, x => x);
@@ -35,5 +38,6 @@ namespace Infrastructure.Providers.Configs
 
         public PlayerStatsConfig GetPlayerStatsConfig() => _playerStatsConfig;
         public EnemyConfig GetEnemyConfig(int id) => _enemies.TryGetValue(id, out var config) ? config : null;
+        public CombatAudioConfig GetCombatAudioConfig() => _combatAudioConfig;
     }
 }

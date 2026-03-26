@@ -9,12 +9,14 @@ namespace Input.PlayerInput
         private IInputState _currentState;
         
         public readonly GameplayInputState GameplayInputState;
+        public readonly DisabledInputState DisabledInputState;
         
         public InputManager(global::PlayerInput playerInput)
         {
             Actions = new ActionHolder();
 
             GameplayInputState = new GameplayInputState(playerInput, Actions);
+            DisabledInputState = new DisabledInputState(playerInput);
         }
         
         public void ChangeState(IInputState newState)

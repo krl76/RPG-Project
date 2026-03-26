@@ -1,25 +1,29 @@
-﻿using Infrastructure.Factories.UI;
+using Core.Gameplay.State;
+using Infrastructure.Factories.UI;
 using Infrastructure.Providers.Configs;
-using Infrastructure.Services.Events;
 using UnityEngine;
 
 namespace Infrastructure.Services.UI
 {
-    public class WindowService : IWindowService, IGameStateSubscriber
+    public class WindowService : IWindowService
     {
         private readonly IUIFactory _uiFactory;
         private readonly IConfigDataProvider _configDataProvider;
-        
+        private readonly IGameStateService _gameStateService;
+
         public WindowService(
-            IUIFactory uiFactory, 
-            IConfigDataProvider configDataProvider)
+            IUIFactory uiFactory,
+            IConfigDataProvider configDataProvider,
+            IGameStateService gameStateService)
         {
             _uiFactory = uiFactory;
             _configDataProvider = configDataProvider;
-            EventBus.Subscribe(this);
+            _gameStateService = gameStateService;
+
+            _gameStateService.StateChanged += OnGameStateChanged;
         }
 
-        public bool IsWindowOpened(WindowID windowID) => 
+        public bool IsWindowOpened(WindowID windowID) =>
             _uiFactory.Exists(windowID);
 
         public void Open(WindowID windowID)
@@ -30,7 +34,7 @@ namespace Infrastructure.Services.UI
                 Debug.LogError($"[WindowService] Failed to open. Prefab not found for ID: {windowID}");
                 return;
             }
-            
+
             _uiFactory.CreateScreen(prefab, windowID);
         }
 
@@ -40,20 +44,24 @@ namespace Infrastructure.Services.UI
             return _uiFactory.GetScreenComponent<T>(windowID);
         }
 
-        public T Get<T>(WindowID windowID) where T : Component => 
+        public T Get<T>(WindowID windowID) where T : Component =>
             _uiFactory.GetScreenComponent<T>(windowID);
 
-        public void Close(WindowID windowID) => 
+        public void Close(WindowID windowID) =>
             _uiFactory.DestroyScreen(windowID);
 
-        public void OnGameOver()
+        private void OnGameStateChanged(GameState state)
         {
-            Open(WindowID.GameOver);
-        }
+            if (state == GameState.GameOver)
+            {
+                Open(WindowID.GameOver);
+                return;
+            }
 
-        public void OnGameRestarted()
-        {
-            //
+            if (IsWindowOpened(WindowID.GameOver))
+            {
+                Close(WindowID.GameOver);
+            }
         }
     }
 }

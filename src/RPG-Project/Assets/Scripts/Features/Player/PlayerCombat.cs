@@ -3,6 +3,7 @@ using Data.Configs;
 using Features.Combat;
 using Infrastructure.Factories.Objects;
 using Infrastructure.Providers.Configs;
+using Infrastructure.Services.Audio;
 using Infrastructure.Services.Events;
 using Infrastructure.Services.Player.Animator;
 using UnityEngine;
@@ -23,16 +24,19 @@ namespace Features.Player
         private IGameObjectFactory _gameObjectFactory;
         private IPlayerAnimatorService _animator;
         private IConfigDataProvider _configDataProvider;
+        private ICombatAudioService _combatAudioService;
 
         [Inject]
         private void Construct(
             IGameObjectFactory gameObjectFactory,
             IConfigDataProvider configDataProvider,
-            IPlayerAnimatorService playerAnimatorService)
+            IPlayerAnimatorService playerAnimatorService,
+            ICombatAudioService combatAudioService)
         {
             _gameObjectFactory = gameObjectFactory;
             _configDataProvider = configDataProvider;
             _animator = playerAnimatorService;
+            _combatAudioService = combatAudioService;
         }
 
         private void Start()
@@ -50,6 +54,7 @@ namespace Features.Player
         private void PhysicalAttack()
         {
             var config = _configDataProvider.GetPlayerStatsConfig();
+            _combatAudioService.PlayPlayerMeleeAttack();
             
             Collider[] hitColliders = Physics.OverlapSphere(_meleeAttackPoint.position, config.MeleeHitRadius, _enemyLayer);
 
@@ -67,6 +72,7 @@ namespace Features.Player
         public void OnMagicUsed(float cooldownDuration)
         {
             var config = _configDataProvider.GetPlayerStatsConfig();
+            _combatAudioService.PlayPlayerShot();
             var projectile = _gameObjectFactory
                 .Instantiate(_magicProjectilePrefab, _shootPoint.position, transform.rotation);
             projectile.GetComponent<MagicProjectile>().Setup(config.MagicDamage, config.ProjectileSpeed, 15);

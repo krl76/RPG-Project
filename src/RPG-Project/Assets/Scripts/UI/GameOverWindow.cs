@@ -1,40 +1,50 @@
-using System;
-using Infrastructure.Services.Events;
-using Infrastructure.Services.Scene;
 using Infrastructure.Services.UI;
 using UI.Base;
+using UI.MVC.Controllers;
+using UI.MVC.Views;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
 namespace UI
 {
-    public class GameOverWindow : WindowBase
+    public class GameOverWindow : WindowBase, IGameOverView
     {
         public override WindowID Id => WindowID.GameOver;
         public override bool IsPopup => true;
 
         [SerializeField] private Button _restartButton;
-        private ISceneLoaderService _sceneLoader;
+        [SerializeField] private Button _backToMenuButton;
+
+        public event System.Action RestartRequested;
+        public event System.Action BackToMenuRequested;
+
+        private GameOverWindowController _controller;
+
+        [Inject]
+        private void Construct(GameOverWindowController controller)
+        {
+            _controller = controller;
+        }
 
         public override void OnOpen(object payload = null)
         {
             base.OnOpen(payload);
-            
-            _restartButton.onClick.AddListener(RestartGame);
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+
+            _restartButton.onClick.AddListener(RaiseRestartRequested);
+            _backToMenuButton.onClick.AddListener(RaiseBackToMenuRequested);
+            _controller.Attach(this);
         }
 
         public override void OnClose()
         {
+            _controller.Detach();
+            _restartButton.onClick.RemoveListener(RaiseRestartRequested);
+            _backToMenuButton.onClick.RemoveListener(RaiseBackToMenuRequested);
             base.OnClose();
-            _restartButton.onClick.RemoveListener(RestartGame);
         }
 
-        private void RestartGame()
-        {
-            EventBus.RaiseEvent<IGameStateSubscriber>(sub => sub.OnGameRestarted());
-        }
+        private void RaiseRestartRequested() => RestartRequested?.Invoke();
+        private void RaiseBackToMenuRequested() => BackToMenuRequested?.Invoke();
     }
 }
