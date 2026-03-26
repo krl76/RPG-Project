@@ -58,6 +58,7 @@ namespace Infrastructure.Services.Player.Input
             _rebindOperation = binding.Action
                 .PerformInteractiveRebinding(binding.BindingIndex)
                 .WithControlsHavingToMatchPath("<Keyboard>")
+                .WithControlsHavingToMatchPath("<Mouse>")
                 .WithCancelingThrough("<Keyboard>/escape")
                 .OnCancel(operation => FinishRebind(binding.Action, wasEnabled, operation, onCancel, saveOverrides: false))
                 .OnComplete(operation => FinishRebind(binding.Action, wasEnabled, operation, onComplete, saveOverrides: true));

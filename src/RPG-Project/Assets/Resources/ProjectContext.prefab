@@ -74,3 +74,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 557c1f433bae4f809daf2c50ab5ae15a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Infrastructure.Installers.InfrastructureInstaller
+  _audioMixer: {fileID: 24100000, guid: 2ecbf010653863441abe56538d3876c4, type: 2}

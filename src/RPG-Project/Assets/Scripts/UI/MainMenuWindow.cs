@@ -6,6 +6,9 @@ using UI.Base;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UI
 {
@@ -67,7 +70,11 @@ namespace UI
 
         private static void ExitGame()
         {
+#if UNITY_EDITOR
+            EditorApplication.isPlaying = false;
+#else
             Application.Quit();
+#endif
         }
     }
 }

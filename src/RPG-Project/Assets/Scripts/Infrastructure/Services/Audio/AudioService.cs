@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace Infrastructure.Services.Audio
 {
@@ -7,29 +8,28 @@ namespace Infrastructure.Services.Audio
         private const string MasterVolumeKey = "audio.master";
         private const string MusicVolumeKey = "audio.music";
         private const string EffectsVolumeKey = "audio.effects";
+        private const string MasterVolumeParameter = "MasterVolume";
+        private const string MusicVolumeParameter = "MusicVolume";
+        private const string EffectsVolumeParameter = "EffectsVolume";
+        private const float MinDecibels = -80f;
 
         public event System.Action VolumesChanged;
+
+        private readonly AudioMixer _audioMixer;
 
         public float MasterVolume { get; private set; }
         public float MusicVolume { get; private set; }
         public float EffectsVolume { get; private set; }
 
-        public AudioService()
+        public AudioService(AudioMixer audioMixer)
         {
+            _audioMixer = audioMixer;
+
             MasterVolume = LoadVolume(MasterVolumeKey);
             MusicVolume = LoadVolume(MusicVolumeKey);
             EffectsVolume = LoadVolume(EffectsVolumeKey);
-        }
 
-        public float GetEffectiveVolume(AudioChannel channel)
-        {
-            return channel switch
-            {
-                AudioChannel.Master => MasterVolume,
-                AudioChannel.Music => MasterVolume * MusicVolume,
-                AudioChannel.Effects => MasterVolume * EffectsVolume,
-                _ => 1f
-            };
+            ApplyVolumes();
         }
 
         public void SetMasterVolume(float value) =>
@@ -51,7 +51,39 @@ namespace Infrastructure.Services.Audio
             assign(value);
             PlayerPrefs.SetFloat(key, value);
             PlayerPrefs.Save();
+            ApplyVolumes();
             VolumesChanged?.Invoke();
+        }
+
+        private void ApplyVolumes()
+        {
+            if (_audioMixer == null)
+            {
+                Debug.LogWarning("[AudioService] AudioMixer is not assigned.");
+                return;
+            }
+
+            TrySetMixerVolume(MasterVolumeParameter, MasterVolume);
+            TrySetMixerVolume(MusicVolumeParameter, MusicVolume);
+            TrySetMixerVolume(EffectsVolumeParameter, EffectsVolume);
+        }
+
+        private void TrySetMixerVolume(string parameterName, float value)
+        {
+            if (_audioMixer.SetFloat(parameterName, LinearToDecibels(value)) == false)
+            {
+                Debug.LogWarning($"[AudioService] Exposed parameter '{parameterName}' was not found in AudioMixer.");
+            }
+        }
+
+        private static float LinearToDecibels(float value)
+        {
+            if (value <= 0.0001f)
+            {
+                return MinDecibels;
+            }
+
+            return Mathf.Log10(value) * 20f;
         }
 
         private static float LoadVolume(string key) =>

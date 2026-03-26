@@ -15,12 +15,15 @@ using Infrastructure.Services.Player.Input;
 using Infrastructure.Services.Scene;
 using Infrastructure.Services.UI;
 using Input.PlayerInput;
+using UnityEngine.Audio;
 using Zenject;
 
 namespace Infrastructure.Installers
 {
     public class InfrastructureInstaller : MonoInstaller
     {
+        [UnityEngine.SerializeField] private AudioMixer _audioMixer;
+
         public override void InstallBindings()
         {
             BindProviders();
@@ -55,7 +58,7 @@ namespace Infrastructure.Installers
 
         private void BindAudio()
         {
-            Container.Bind<IAudioService>().To<AudioService>().AsSingle();
+            Container.Bind<IAudioService>().To<AudioService>().AsSingle().WithArguments(_audioMixer);
         }
 
         private void BindGameplayServices()
