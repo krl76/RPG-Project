@@ -1,6 +1,8 @@
 using Core.Gameplay.State;
 using Cysharp.Threading.Tasks;
 using Infrastructure.Providers.Configs;
+using Infrastructure.Services.Audio;
+using Infrastructure.Services.Player.Input;
 using Input.PlayerInput;
 
 namespace Core.StateMachine.States
@@ -16,12 +18,18 @@ namespace Core.StateMachine.States
             IGameStateService gameStateService,
             IGameStateMachine gameStateMachine,
             IConfigDataProvider configDataProvider,
-            InputManager inputManager)
+            InputManager inputManager,
+            IAudioService audioService,
+            IInputBindingService inputBindingService)
         {
             _gameStateService = gameStateService;
             _gameStateMachine = gameStateMachine;
             _configDataProvider = configDataProvider;
             _inputManager = inputManager;
+
+            // Force saved audio volumes and input overrides to be loaded during bootstrap.
+            _ = audioService;
+            _ = inputBindingService;
         }
 
         public async UniTask Enter()

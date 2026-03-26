@@ -1,5 +1,6 @@
 using Core.Bootstrap.Scenes.Game;
 using Core.Bootstrap.Scenes.MainMenu;
+using Core.Gameplay.Pause;
 using Core.Gameplay.State;
 using Core.StateMachine;
 using Core.StateMachine.States;
@@ -34,6 +35,7 @@ namespace Infrastructure.Installers
             BindUIServices();
             BindFactories();
             BindStateMachine();
+            BindGameplayFlow();
             BindSceneBootstraps();
         }
 
@@ -90,6 +92,11 @@ namespace Infrastructure.Installers
             Container.Bind<LoadGameState>().AsTransient();
             Container.Bind<GameplayState>().AsTransient();
             Container.Bind<GameOverState>().AsTransient();
+        }
+
+        private void BindGameplayFlow()
+        {
+            Container.BindInterfacesAndSelfTo<GameplayPauseController>().AsSingle();
         }
 
         private void BindSceneBootstraps()

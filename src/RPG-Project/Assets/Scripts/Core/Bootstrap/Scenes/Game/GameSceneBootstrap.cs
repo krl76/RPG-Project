@@ -1,3 +1,4 @@
+using Core.Gameplay.Pause;
 using Infrastructure.Factories.Objects;
 using Infrastructure.Services.Camera;
 using Infrastructure.Services.Player;
@@ -18,6 +19,7 @@ namespace Core.Bootstrap.Scenes.Game
         private readonly InputManager _inputManager;
         private readonly IWindowService _windowService;
         private readonly IGameObjectFactory _gameObjectFactory;
+        private readonly GameplayPauseController _gameplayPauseController;
 
         private bool _isGameplayInstalled;
 
@@ -29,7 +31,8 @@ namespace Core.Bootstrap.Scenes.Game
             ICameraService cameraService,
             InputManager inputManager,
             IWindowService windowService,
-            IGameObjectFactory gameObjectFactory)
+            IGameObjectFactory gameObjectFactory,
+            GameplayPauseController gameplayPauseController)
         {
             _playerService = playerService;
             _playerAnimatorService = playerAnimatorService;
@@ -39,6 +42,7 @@ namespace Core.Bootstrap.Scenes.Game
             _inputManager = inputManager;
             _windowService = windowService;
             _gameObjectFactory = gameObjectFactory;
+            _gameplayPauseController = gameplayPauseController;
         }
 
         public bool Initialize()
@@ -48,6 +52,7 @@ namespace Core.Bootstrap.Scenes.Game
                 return true;
             }
 
+            _gameplayPauseController.Cleanup();
             _playerService.InstallService();
             if (_playerService.PlayerObject == null || _playerService.PlayerTransform == null)
             {
@@ -87,6 +92,7 @@ namespace Core.Bootstrap.Scenes.Game
         public void Cleanup()
         {
             DisableGameplay();
+            _gameplayPauseController.Cleanup();
 
             if (_windowService.IsWindowOpened(WindowID.HUD))
             {

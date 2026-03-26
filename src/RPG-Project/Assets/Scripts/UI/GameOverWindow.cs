@@ -15,6 +15,7 @@ namespace UI
         public override bool IsPopup => true;
 
         [SerializeField] private Button _restartButton;
+        [SerializeField] private Button _backToMenuButton;
 
         private IGameStateMachine _gameStateMachine;
 
@@ -29,6 +30,7 @@ namespace UI
             base.OnOpen(payload);
 
             _restartButton.onClick.AddListener(RestartGame);
+            _backToMenuButton.onClick.AddListener(BackToMenu);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
@@ -37,6 +39,7 @@ namespace UI
         {
             base.OnClose();
             _restartButton.onClick.RemoveListener(RestartGame);
+            _backToMenuButton.onClick.RemoveListener(BackToMenu);
         }
 
         private void RestartGame()
@@ -44,9 +47,19 @@ namespace UI
             RestartGameAsync().Forget();
         }
 
+        private void BackToMenu()
+        {
+            BackToMenuAsync().Forget();
+        }
+
         private async UniTask RestartGameAsync()
         {
             await _gameStateMachine.Enter<LoadGameState>();
+        }
+
+        private async UniTask BackToMenuAsync()
+        {
+            await _gameStateMachine.Enter<LoadMainMenuState>();
         }
     }
 }

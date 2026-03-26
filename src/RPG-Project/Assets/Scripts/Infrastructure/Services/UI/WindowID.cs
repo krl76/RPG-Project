@@ -8,5 +8,6 @@
         GameOver = 2,
         MainMenu = 3,
         Settings = 4,
+        Pause = 5,
     }
 }

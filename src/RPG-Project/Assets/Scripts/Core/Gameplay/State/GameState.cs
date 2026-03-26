@@ -7,6 +7,7 @@ namespace Core.Gameplay.State
         Loading = 2,
         MainMenu = 3,
         Gameplay = 4,
-        GameOver = 5
+        Paused = 5,
+        GameOver = 6
     }
 }

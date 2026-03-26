@@ -47,6 +47,8 @@ namespace Infrastructure.Services.Player.Input
         
         public void InstallService()
         {
+            ResetCombatState();
+
             _movement = _playerService.PlayerObject.GetComponent<PlayerMovement>();
             _config = _configDataProvider.GetPlayerStatsConfig();
             
@@ -72,6 +74,8 @@ namespace Infrastructure.Services.Player.Input
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
+
+            ResetCombatState();
         }
 
         public void AttackEnd()
@@ -134,6 +138,15 @@ namespace Infrastructure.Services.Player.Input
             _isMagicAttackAvailable = true;
             if (isCancelled) return;
             EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicReady());
+        }
+
+        private void ResetCombatState()
+        {
+            _isAttackStarted = false;
+            _isAiming = false;
+            _isMagicAttackAvailable = true;
+
+            _movementInputService.CanMove = true;
         }
     }
 }
