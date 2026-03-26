@@ -6,6 +6,7 @@ using Core.StateMachine.States;
 using Infrastructure.Factories.Objects;
 using Infrastructure.Factories.UI;
 using Infrastructure.Providers.Configs;
+using Infrastructure.Services.Audio;
 using Infrastructure.Services.Camera;
 using Infrastructure.Services.Enemy;
 using Infrastructure.Services.Player;
@@ -25,7 +26,9 @@ namespace Infrastructure.Installers
             BindProviders();
             BindCoreState();
             BindInput();
+            BindAudio();
             BindGameplayServices();
+            BindUIServices();
             BindFactories();
             BindStateMachine();
             BindSceneBootstraps();
@@ -47,6 +50,12 @@ namespace Infrastructure.Installers
         {
             Container.Bind<PlayerInput>().AsSingle();
             Container.Bind<InputManager>().AsSingle();
+            Container.Bind<IInputBindingService>().To<InputBindingService>().AsSingle();
+        }
+
+        private void BindAudio()
+        {
+            Container.Bind<IAudioService>().To<AudioService>().AsSingle();
         }
 
         private void BindGameplayServices()
@@ -56,8 +65,12 @@ namespace Infrastructure.Installers
             Container.Bind<IFightInputService>().To<FightInputService>().AsSingle();
             Container.Bind<IMovementInputService>().To<MovementInputService>().AsSingle();
             Container.Bind<IPlayerAnimatorService>().To<PlayerAnimatorService>().AsSingle();
-            Container.Bind<IWindowService>().To<WindowService>().AsSingle();
             Container.Bind<IEnemyService>().To<EnemyService>().AsSingle();
+        }
+
+        private void BindUIServices()
+        {
+            Container.Bind<IWindowService>().To<WindowService>().AsSingle();
         }
 
         private void BindFactories()

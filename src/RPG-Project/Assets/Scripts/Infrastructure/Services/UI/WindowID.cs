@@ -6,5 +6,7 @@
         Unknown = 0,
         HUD = 1,
         GameOver = 2,
+        MainMenu = 3,
+        Settings = 4,
     }
 }

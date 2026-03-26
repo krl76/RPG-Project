@@ -26,6 +26,7 @@ namespace Core.StateMachine.States
 
         public void Exit()
         {
+            _mainMenuSceneBootstrap.Cleanup();
         }
     }
 }

@@ -466,6 +466,8 @@ GameObject:
   - component: {fileID: 8466964901856555891}
   - component: {fileID: 3097257943436335658}
   - component: {fileID: 8658906539755073091}
+  - component: {fileID: 9012234567890123456}
+  - component: {fileID: 9012234567890123457}
   m_Layer: 5
   m_Name: MainMenu
   m_TagString: Untagged
@@ -560,6 +562,33 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!225 &9012234567890123456
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4553209665937537847}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &9012234567890123457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4553209665937537847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fe1a13ec7ae4f6fa33586f17449c2b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI.MainMenuWindow
+  _startButton: {fileID: 8360328616446201533}
+  _settingsButton: {fileID: 36635622375584564}
+  _exitButton: {fileID: 3630100399649908083}
 --- !u!1 &4973642540886714922
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,17 +18,27 @@ namespace Infrastructure.Factories.UI
 
         public GameObject CreateScreen(GameObject prefab, WindowID windowId)
         {
-            if (_screenInstances.ContainsKey(windowId))
+            if (_screenInstances.TryGetValue(windowId, out var existingInstance) && existingInstance != null)
             {
                 Debug.LogWarning($"[UIFactory] Screen with WindowID {windowId} already exists. Swapping screens.");
                 DestroyScreen(windowId);
             }
+            else if (_screenInstances.ContainsKey(windowId))
+            {
+                _screenInstances.Remove(windowId);
+            }
 
             var instance = _gameObjectFactory.Instantiate(prefab);
+            if (instance.TryGetComponent<WindowBase>(out var window) == false)
+            {
+                Debug.LogError($"[UIFactory] Screen prefab for {windowId} has no {nameof(WindowBase)}.");
+                Object.Destroy(instance);
+                return null;
+            }
 
             if (_screenInstances.TryAdd(windowId, instance))
             {
-                instance.GetComponent<WindowBase>().OnOpen();
+                window.OnOpen();
                 
                 return instance;
             }
@@ -41,6 +51,13 @@ namespace Infrastructure.Factories.UI
         {
             if (_screenInstances.TryGetValue(windowId, out var screenObject))
             {
+                if (screenObject == null)
+                {
+                    _screenInstances.Remove(windowId);
+                    Debug.LogError($"[UIFactory] Screen with WindowID {windowId} was destroyed unexpectedly.");
+                    return null;
+                }
+
                 if (screenObject.TryGetComponent<T>(out var screenComponent))
                 {
                     return screenComponent;
@@ -61,10 +78,34 @@ namespace Infrastructure.Factories.UI
                 Debug.LogWarning($"[UIFactory] Cannot destroy. Screen with WindowID {windowId} not found.");
                 return;
             }
+
+            if (screenObject == null)
+            {
+                return;
+            }
+
+            if (screenObject.TryGetComponent<WindowBase>(out var window))
+            {
+                window.OnClose();
+            }
             
             _gameObjectFactory.Destroy(screenObject);
         }
 
-        public bool Exists(WindowID windowId) => _screenInstances.ContainsKey(windowId);
+        public bool Exists(WindowID windowId)
+        {
+            if (_screenInstances.TryGetValue(windowId, out var screenObject) == false)
+            {
+                return false;
+            }
+
+            if (screenObject != null)
+            {
+                return true;
+            }
+
+            _screenInstances.Remove(windowId);
+            return false;
+        }
     }
 }
