@@ -1,18 +1,14 @@
-using Core.StateMachine;
-using Core.StateMachine.States;
-using Cysharp.Threading.Tasks;
 using Infrastructure.Services.UI;
 using UI.Base;
+using UI.MVC.Controllers;
+using UI.MVC.Views;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace UI
 {
-    public sealed class MainMenuWindow : WindowBase
+    public sealed class MainMenuWindow : WindowBase, IMainMenuView
     {
         public override WindowID Id => WindowID.MainMenu;
 
@@ -20,61 +16,40 @@ namespace UI
         [SerializeField] private Button _settingsButton;
         [SerializeField] private Button _exitButton;
 
-        private IGameStateMachine _gameStateMachine;
-        private IWindowService _windowService;
+        public event System.Action PlayRequested;
+        public event System.Action SettingsRequested;
+        public event System.Action ExitRequested;
+
+        private MainMenuWindowController _controller;
 
         [Inject]
-        private void Construct(IGameStateMachine gameStateMachine, IWindowService windowService)
+        private void Construct(MainMenuWindowController controller)
         {
-            _gameStateMachine = gameStateMachine;
-            _windowService = windowService;
+            _controller = controller;
         }
 
         public override void OnOpen(object payload = null)
         {
             base.OnOpen(payload);
 
-            _startButton.onClick.AddListener(StartGame);
-            _settingsButton.onClick.AddListener(OpenSettings);
-            _exitButton.onClick.AddListener(ExitGame);
+            _startButton.onClick.AddListener(RaisePlayRequested);
+            _settingsButton.onClick.AddListener(RaiseSettingsRequested);
+            _exitButton.onClick.AddListener(RaiseExitRequested);
+            _controller.Attach(this);
         }
 
         public override void OnClose()
         {
-            _startButton.onClick.RemoveListener(StartGame);
-            _settingsButton.onClick.RemoveListener(OpenSettings);
-            _exitButton.onClick.RemoveListener(ExitGame);
+            _controller.Detach();
+            _startButton.onClick.RemoveListener(RaisePlayRequested);
+            _settingsButton.onClick.RemoveListener(RaiseSettingsRequested);
+            _exitButton.onClick.RemoveListener(RaiseExitRequested);
 
             base.OnClose();
         }
 
-        private void StartGame()
-        {
-            StartGameAsync().Forget();
-        }
-
-        private async UniTask StartGameAsync()
-        {
-            await _gameStateMachine.Enter<LoadGameState>();
-        }
-
-        private void OpenSettings()
-        {
-            if (_windowService.IsWindowOpened(WindowID.Settings))
-            {
-                return;
-            }
-
-            _windowService.Open(WindowID.Settings);
-        }
-
-        private static void ExitGame()
-        {
-#if UNITY_EDITOR
-            EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
-        }
+        private void RaisePlayRequested() => PlayRequested?.Invoke();
+        private void RaiseSettingsRequested() => SettingsRequested?.Invoke();
+        private void RaiseExitRequested() => ExitRequested?.Invoke();
     }
 }

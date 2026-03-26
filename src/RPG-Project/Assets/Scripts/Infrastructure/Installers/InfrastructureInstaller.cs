@@ -16,6 +16,7 @@ using Infrastructure.Services.Player.Input;
 using Infrastructure.Services.Scene;
 using Infrastructure.Services.UI;
 using Input.PlayerInput;
+using UI.MVC.Controllers;
 using UnityEngine.Audio;
 using Zenject;
 
@@ -34,6 +35,7 @@ namespace Infrastructure.Installers
             BindGameplayServices();
             BindUIServices();
             BindFactories();
+            BindUIControllers();
             BindStateMachine();
             BindGameplayFlow();
             BindSceneBootstraps();
@@ -85,6 +87,15 @@ namespace Infrastructure.Installers
         {
             Container.Bind<IGameObjectFactory>().To<GameObjectFactory>().AsSingle();
             Container.Bind<IUIFactory>().To<UIFactory>().AsSingle();
+        }
+
+        private void BindUIControllers()
+        {
+            Container.Bind<HUDWindowController>().AsTransient();
+            Container.Bind<MainMenuWindowController>().AsTransient();
+            Container.Bind<SettingsWindowController>().AsTransient();
+            Container.Bind<PauseWindowController>().AsTransient();
+            Container.Bind<GameOverWindowController>().AsTransient();
         }
 
         private void BindStateMachine()

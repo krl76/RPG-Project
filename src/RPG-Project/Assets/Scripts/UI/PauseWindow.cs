@@ -1,13 +1,14 @@
-using Core.Gameplay.Pause;
 using Infrastructure.Services.UI;
 using UI.Base;
+using UI.MVC.Controllers;
+using UI.MVC.Views;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
 namespace UI
 {
-    public sealed class PauseWindow : WindowBase
+    public sealed class PauseWindow : WindowBase, IPauseView
     {
         public override WindowID Id => WindowID.Pause;
         public override bool IsPopup => true;
@@ -18,45 +19,40 @@ namespace UI
         [SerializeField] private Button _settingsButton;
         [SerializeField] private Button _exitToMainMenuButton;
 
-        private GameplayPauseController _gameplayPauseController;
+        public event System.Action ResumeRequested;
+        public event System.Action SettingsRequested;
+        public event System.Action ExitToMainMenuRequested;
+
+        private PauseWindowController _controller;
 
         [Inject]
-        private void Construct(GameplayPauseController gameplayPauseController)
+        private void Construct(PauseWindowController controller)
         {
-            _gameplayPauseController = gameplayPauseController;
+            _controller = controller;
         }
 
         public override void OnOpen(object payload = null)
         {
             base.OnOpen(payload);
 
-            _goToGameButton.onClick.AddListener(ResumeGame);
-            _settingsButton.onClick.AddListener(OpenSettings);
-            _exitToMainMenuButton.onClick.AddListener(ExitToMainMenu);
+            _goToGameButton.onClick.AddListener(RaiseResumeRequested);
+            _settingsButton.onClick.AddListener(RaiseSettingsRequested);
+            _exitToMainMenuButton.onClick.AddListener(RaiseExitToMainMenuRequested);
+            _controller.Attach(this);
         }
 
         public override void OnClose()
         {
-            _goToGameButton.onClick.RemoveListener(ResumeGame);
-            _settingsButton.onClick.RemoveListener(OpenSettings);
-            _exitToMainMenuButton.onClick.RemoveListener(ExitToMainMenu);
+            _controller.Detach();
+            _goToGameButton.onClick.RemoveListener(RaiseResumeRequested);
+            _settingsButton.onClick.RemoveListener(RaiseSettingsRequested);
+            _exitToMainMenuButton.onClick.RemoveListener(RaiseExitToMainMenuRequested);
 
             base.OnClose();
         }
 
-        private void ResumeGame()
-        {
-            _gameplayPauseController.Resume();
-        }
-
-        private void OpenSettings()
-        {
-            _gameplayPauseController.OpenSettings();
-        }
-
-        private void ExitToMainMenu()
-        {
-            _gameplayPauseController.ExitToMainMenu();
-        }
+        private void RaiseResumeRequested() => ResumeRequested?.Invoke();
+        private void RaiseSettingsRequested() => SettingsRequested?.Invoke();
+        private void RaiseExitToMainMenuRequested() => ExitToMainMenuRequested?.Invoke();
     }
 }

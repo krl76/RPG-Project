@@ -1,15 +1,16 @@
-using Infrastructure.Services.Audio;
 using Infrastructure.Services.Player.Input;
 using Infrastructure.Services.UI;
 using TMPro;
 using UI.Base;
+using UI.MVC.Controllers;
+using UI.MVC.Views;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
 namespace UI
 {
-    public sealed class SettingsWindow : WindowBase
+    public sealed class SettingsWindow : WindowBase, ISettingsView
     {
         public override WindowID Id => WindowID.Settings;
         public override bool IsPopup => true;
@@ -23,112 +24,53 @@ namespace UI
         [SerializeField] private Button _swordAttackButton;
         [SerializeField] private Button _magicAttackButton;
 
-        private IWindowService _windowService;
-        private IAudioService _audioService;
-        private IInputBindingService _inputBindingService;
+        public event System.Action CloseRequested;
+        public event System.Action<float> MasterVolumeChanged;
+        public event System.Action<float> MusicVolumeChanged;
+        public event System.Action<float> EffectsVolumeChanged;
+        public event System.Action<InputBindingKey> RebindRequested;
+
+        private SettingsWindowController _controller;
 
         [Inject]
-        private void Construct(
-            IWindowService windowService,
-            IAudioService audioService,
-            IInputBindingService inputBindingService)
+        private void Construct(SettingsWindowController controller)
         {
-            _windowService = windowService;
-            _audioService = audioService;
-            _inputBindingService = inputBindingService;
+            _controller = controller;
         }
 
         public override void OnOpen(object payload = null)
         {
             base.OnOpen(payload);
 
-            BindButtons();
-            BindSliders();
-            RefreshVolumeSliders();
-            RefreshBindingTexts();
+            BindViewEvents();
+            _controller.Attach(this);
         }
 
         public override void OnClose()
         {
-            _inputBindingService.CancelRebind();
-
-            _closeButton.onClick.RemoveListener(CloseWindow);
-
-            _masterVolumeSlider.onValueChanged.RemoveListener(OnMasterVolumeChanged);
-            _musicVolumeSlider.onValueChanged.RemoveListener(OnMusicVolumeChanged);
-            _effectsVolumeSlider.onValueChanged.RemoveListener(OnEffectsVolumeChanged);
-
-            _jumpButton.onClick.RemoveListener(RebindJump);
-            _sprintButton.onClick.RemoveListener(RebindSprint);
-            _swordAttackButton.onClick.RemoveListener(RebindSwordAttack);
-            _magicAttackButton.onClick.RemoveListener(RebindMagicAttack);
-
+            _controller.Detach();
+            UnbindViewEvents();
             base.OnClose();
         }
 
-        private void BindButtons()
+        public void SetVolumes(float master, float music, float effects)
         {
-            _closeButton.onClick.AddListener(CloseWindow);
-            _jumpButton.onClick.AddListener(RebindJump);
-            _sprintButton.onClick.AddListener(RebindSprint);
-            _swordAttackButton.onClick.AddListener(RebindSwordAttack);
-            _magicAttackButton.onClick.AddListener(RebindMagicAttack);
+            _masterVolumeSlider.SetValueWithoutNotify(master);
+            _musicVolumeSlider.SetValueWithoutNotify(music);
+            _effectsVolumeSlider.SetValueWithoutNotify(effects);
         }
 
-        private void BindSliders()
+        public void SetBindingDisplay(InputBindingKey bindingKey, string displayValue)
         {
-            _masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
-            _musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
-            _effectsVolumeSlider.onValueChanged.AddListener(OnEffectsVolumeChanged);
+            SetButtonText(GetButton(bindingKey), $"{GetBindingLabel(bindingKey)}: {displayValue}");
         }
 
-        private void RefreshVolumeSliders()
+        public void ShowRebindPrompt(InputBindingKey bindingKey)
         {
-            _masterVolumeSlider.SetValueWithoutNotify(_audioService.MasterVolume);
-            _musicVolumeSlider.SetValueWithoutNotify(_audioService.MusicVolume);
-            _effectsVolumeSlider.SetValueWithoutNotify(_audioService.EffectsVolume);
+            SetButtonText(GetButton(bindingKey), $"{GetBindingLabel(bindingKey)}: press key...");
         }
 
-        private void RefreshBindingTexts()
-        {
-            SetBindingText(_jumpButton, InputBindingKey.Jump);
-            SetBindingText(_sprintButton, InputBindingKey.Sprint);
-            SetBindingText(_swordAttackButton, InputBindingKey.SwordAttack);
-            SetBindingText(_magicAttackButton, InputBindingKey.MagicAttack);
-        }
-
-        private void CloseWindow()
-        {
-            _windowService.Close(WindowID.Settings);
-        }
-
-        private void OnMasterVolumeChanged(float value) => _audioService.SetMasterVolume(value);
-        private void OnMusicVolumeChanged(float value) => _audioService.SetMusicVolume(value);
-        private void OnEffectsVolumeChanged(float value) => _audioService.SetEffectsVolume(value);
-
-        private void RebindJump() => StartRebind(InputBindingKey.Jump, _jumpButton);
-        private void RebindSprint() => StartRebind(InputBindingKey.Sprint, _sprintButton);
-        private void RebindSwordAttack() => StartRebind(InputBindingKey.SwordAttack, _swordAttackButton);
-        private void RebindMagicAttack() => StartRebind(InputBindingKey.MagicAttack, _magicAttackButton);
-
-        private void StartRebind(InputBindingKey bindingKey, Button button)
-        {
-            if (_inputBindingService.StartRebind(bindingKey, OnRebindCompleted, OnRebindCompleted) == false)
-            {
-                return;
-            }
-
-            SetAllRebindButtonsInteractable(false);
-            SetButtonText(button, $"{GetBindingLabel(bindingKey)}: нажмите клавишу...");
-        }
-
-        private void OnRebindCompleted()
-        {
-            SetAllRebindButtonsInteractable(true);
-            RefreshBindingTexts();
-        }
-
-        private void SetAllRebindButtonsInteractable(bool isInteractable)
+        public void SetRebindButtonsInteractable(bool isInteractable)
         {
             _jumpButton.interactable = isInteractable;
             _sprintButton.interactable = isInteractable;
@@ -136,9 +78,40 @@ namespace UI
             _magicAttackButton.interactable = isInteractable;
         }
 
-        private void SetBindingText(Button button, InputBindingKey bindingKey)
+        private void BindViewEvents()
         {
-            SetButtonText(button, $"{GetBindingLabel(bindingKey)}: {_inputBindingService.GetBindingDisplay(bindingKey)}");
+            _closeButton.onClick.AddListener(RaiseCloseRequested);
+            _masterVolumeSlider.onValueChanged.AddListener(RaiseMasterVolumeChanged);
+            _musicVolumeSlider.onValueChanged.AddListener(RaiseMusicVolumeChanged);
+            _effectsVolumeSlider.onValueChanged.AddListener(RaiseEffectsVolumeChanged);
+            _jumpButton.onClick.AddListener(RaiseJumpRebindRequested);
+            _sprintButton.onClick.AddListener(RaiseSprintRebindRequested);
+            _swordAttackButton.onClick.AddListener(RaiseSwordAttackRebindRequested);
+            _magicAttackButton.onClick.AddListener(RaiseMagicAttackRebindRequested);
+        }
+
+        private void UnbindViewEvents()
+        {
+            _closeButton.onClick.RemoveListener(RaiseCloseRequested);
+            _masterVolumeSlider.onValueChanged.RemoveListener(RaiseMasterVolumeChanged);
+            _musicVolumeSlider.onValueChanged.RemoveListener(RaiseMusicVolumeChanged);
+            _effectsVolumeSlider.onValueChanged.RemoveListener(RaiseEffectsVolumeChanged);
+            _jumpButton.onClick.RemoveListener(RaiseJumpRebindRequested);
+            _sprintButton.onClick.RemoveListener(RaiseSprintRebindRequested);
+            _swordAttackButton.onClick.RemoveListener(RaiseSwordAttackRebindRequested);
+            _magicAttackButton.onClick.RemoveListener(RaiseMagicAttackRebindRequested);
+        }
+
+        private Button GetButton(InputBindingKey bindingKey)
+        {
+            return bindingKey switch
+            {
+                InputBindingKey.Jump => _jumpButton,
+                InputBindingKey.Sprint => _sprintButton,
+                InputBindingKey.SwordAttack => _swordAttackButton,
+                InputBindingKey.MagicAttack => _magicAttackButton,
+                _ => null
+            };
         }
 
         private static void SetButtonText(Button button, string value)
@@ -154,16 +127,25 @@ namespace UI
         {
             return bindingKey switch
             {
-                InputBindingKey.MoveUp => "Движение вверх",
-                InputBindingKey.MoveDown => "Движение вниз",
-                InputBindingKey.MoveLeft => "Движение влево",
-                InputBindingKey.MoveRight => "Движение вправо",
-                InputBindingKey.Jump => "Прыжок",
-                InputBindingKey.Sprint => "Бег",
-                InputBindingKey.SwordAttack => "Удар мечом",
-                InputBindingKey.MagicAttack => "Магия",
+                InputBindingKey.MoveUp => "Move Up",
+                InputBindingKey.MoveDown => "Move Down",
+                InputBindingKey.MoveLeft => "Move Left",
+                InputBindingKey.MoveRight => "Move Right",
+                InputBindingKey.Jump => "Jump",
+                InputBindingKey.Sprint => "Sprint",
+                InputBindingKey.SwordAttack => "Sword Attack",
+                InputBindingKey.MagicAttack => "Magic Attack",
                 _ => bindingKey.ToString()
             };
         }
+
+        private void RaiseCloseRequested() => CloseRequested?.Invoke();
+        private void RaiseMasterVolumeChanged(float value) => MasterVolumeChanged?.Invoke(value);
+        private void RaiseMusicVolumeChanged(float value) => MusicVolumeChanged?.Invoke(value);
+        private void RaiseEffectsVolumeChanged(float value) => EffectsVolumeChanged?.Invoke(value);
+        private void RaiseJumpRebindRequested() => RebindRequested?.Invoke(InputBindingKey.Jump);
+        private void RaiseSprintRebindRequested() => RebindRequested?.Invoke(InputBindingKey.Sprint);
+        private void RaiseSwordAttackRebindRequested() => RebindRequested?.Invoke(InputBindingKey.SwordAttack);
+        private void RaiseMagicAttackRebindRequested() => RebindRequested?.Invoke(InputBindingKey.MagicAttack);
     }
 }

@@ -1,13 +1,15 @@
-using Infrastructure.Services.Events;
 using Infrastructure.Services.UI;
 using TMPro;
 using UI.Base;
+using UI.MVC.Controllers;
+using UI.MVC.Views;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 namespace UI
 {
-    public class HUDWindow : WindowBase, IPlayerHealthSubscriber, IPlayerMagicSubscriber
+    public class HUDWindow : WindowBase, IHUDView
     {
         public override WindowID Id => WindowID.HUD;
 
@@ -18,31 +20,33 @@ namespace UI
         private bool _isCooldownActive;
         private float _cooldownTimer;
         private float _cooldownDuration;
+        private HUDWindowController _controller;
+
+        [Inject]
+        private void Construct(HUDWindowController controller)
+        {
+            _controller = controller;
+        }
 
         public override void OnOpen(object payload = null)
         {
             base.OnOpen(payload);
-            EventBus.Subscribe(this);
+            _controller.Attach(this);
         }
 
         public override void OnClose()
         {
+            _controller.Detach();
             base.OnClose();
-            EventBus.Unsubscribe(this);
         }
 
-        public void OnPlayerHealthChanged(float currentHealth, float maxHealth)
+        public void SetHealth(float currentHealth, float maxHealth)
         {
             _hpSlider.value = currentHealth / maxHealth;
             _hpText.text = $"{Mathf.CeilToInt(currentHealth)} / {maxHealth}";
         }
 
-        public void OnPlayerDied()
-        {
-            //TODO: выключение HUD при смерти
-        }
-
-        public void OnMagicUsed(float cooldownDuration)
+        public void StartMagicCooldown(float cooldownDuration)
         {
             _isCooldownActive = true;
             _cooldownTimer = 0f;
@@ -50,7 +54,7 @@ namespace UI
             _magicIcon.fillAmount = 0f;
         }
 
-        public void OnMagicReady()
+        public void CompleteMagicCooldown()
         {
             _isCooldownActive = false;
             _magicIcon.fillAmount = 1f;

@@ -1,15 +1,14 @@
-using Core.StateMachine;
-using Core.StateMachine.States;
-using Cysharp.Threading.Tasks;
 using Infrastructure.Services.UI;
 using UI.Base;
+using UI.MVC.Controllers;
+using UI.MVC.Views;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
 namespace UI
 {
-    public class GameOverWindow : WindowBase
+    public class GameOverWindow : WindowBase, IGameOverView
     {
         public override WindowID Id => WindowID.GameOver;
         public override bool IsPopup => true;
@@ -17,49 +16,35 @@ namespace UI
         [SerializeField] private Button _restartButton;
         [SerializeField] private Button _backToMenuButton;
 
-        private IGameStateMachine _gameStateMachine;
+        public event System.Action RestartRequested;
+        public event System.Action BackToMenuRequested;
+
+        private GameOverWindowController _controller;
 
         [Inject]
-        private void Construct(IGameStateMachine gameStateMachine)
+        private void Construct(GameOverWindowController controller)
         {
-            _gameStateMachine = gameStateMachine;
+            _controller = controller;
         }
 
         public override void OnOpen(object payload = null)
         {
             base.OnOpen(payload);
 
-            _restartButton.onClick.AddListener(RestartGame);
-            _backToMenuButton.onClick.AddListener(BackToMenu);
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            _restartButton.onClick.AddListener(RaiseRestartRequested);
+            _backToMenuButton.onClick.AddListener(RaiseBackToMenuRequested);
+            _controller.Attach(this);
         }
 
         public override void OnClose()
         {
+            _controller.Detach();
+            _restartButton.onClick.RemoveListener(RaiseRestartRequested);
+            _backToMenuButton.onClick.RemoveListener(RaiseBackToMenuRequested);
             base.OnClose();
-            _restartButton.onClick.RemoveListener(RestartGame);
-            _backToMenuButton.onClick.RemoveListener(BackToMenu);
         }
 
-        private void RestartGame()
-        {
-            RestartGameAsync().Forget();
-        }
-
-        private void BackToMenu()
-        {
-            BackToMenuAsync().Forget();
-        }
-
-        private async UniTask RestartGameAsync()
-        {
-            await _gameStateMachine.Enter<LoadGameState>();
-        }
-
-        private async UniTask BackToMenuAsync()
-        {
-            await _gameStateMachine.Enter<LoadMainMenuState>();
-        }
+        private void RaiseRestartRequested() => RestartRequested?.Invoke();
+        private void RaiseBackToMenuRequested() => BackToMenuRequested?.Invoke();
     }
 }
