@@ -10,5 +10,6 @@ namespace Infrastructure.Providers.Configs
         GameObject GetWindowPrefab(WindowID id);
         PlayerStatsConfig GetPlayerStatsConfig();
         EnemyConfig GetEnemyConfig(int id);
+        CombatAudioConfig GetCombatAudioConfig();
     }
 }

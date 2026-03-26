@@ -1,6 +1,7 @@
 using Data.Configs;
 using Features.Combat;
 using Infrastructure.Factories.Objects;
+using Infrastructure.Services.Audio;
 using Infrastructure.Services.Enemy;
 using Infrastructure.Services.Player;
 using UnityEngine;
@@ -30,16 +31,19 @@ namespace Features.Enemy
         private IGameObjectFactory _gameObjectFactory;
         private IEnemyService _enemyService;
         private IPlayerService _playerService;
+        private ICombatAudioService _combatAudioService;
 
         [Inject]
         private void Construct(
             IPlayerService playerService,
             IGameObjectFactory gameObjectFactory,
-            IEnemyService enemyService)
+            IEnemyService enemyService,
+            ICombatAudioService combatAudioService)
         {
             _playerService = playerService;
             _gameObjectFactory = gameObjectFactory;
             _enemyService = enemyService;
+            _combatAudioService = combatAudioService;
         }
 
         private void Awake()
@@ -135,6 +139,8 @@ namespace Features.Enemy
 
         public void OnPhysicalAttack()
         {
+            _combatAudioService.PlayEnemyMeleeAttack();
+
             Collider[] hitColliders = Physics.OverlapSphere(
                 _meleeAttackPoint.position,
                 Config.HitRadius,
@@ -152,6 +158,7 @@ namespace Features.Enemy
 
         private void OnMagicAttack()
         {
+            _combatAudioService.PlayEnemyMagicAttack();
             var projectile = _gameObjectFactory
                 .Instantiate(Config.ProjectilePrefab, _shootPoint.position, transform.rotation);
             projectile.GetComponent<MagicProjectile>().Setup(Config.Damage, Config.ProjectileSpeed);
@@ -165,6 +172,7 @@ namespace Features.Enemy
             }
 
             _currentHealth -= amount;
+            _combatAudioService.PlayEnemyHit();
 
             _healthFeedback.OnHealthChanged(_currentHealth, Config.MaxHealth);
 

@@ -61,6 +61,8 @@ namespace Infrastructure.Installers
         private void BindAudio()
         {
             Container.Bind<IAudioService>().To<AudioService>().AsSingle().WithArguments(_audioMixer);
+            Container.Bind<IEffectsAudioService>().To<EffectsAudioService>().AsSingle().WithArguments(_audioMixer);
+            Container.Bind<ICombatAudioService>().To<CombatAudioService>().AsSingle();
         }
 
         private void BindGameplayServices()
@@ -76,6 +78,7 @@ namespace Infrastructure.Installers
         private void BindUIServices()
         {
             Container.Bind<IWindowService>().To<WindowService>().AsSingle();
+            Container.Bind<ILoadingScreenService>().To<LoadingScreenService>().AsSingle();
         }
 
         private void BindFactories()

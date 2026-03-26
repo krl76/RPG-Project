@@ -9,5 +9,6 @@
         MainMenu = 3,
         Settings = 4,
         Pause = 5,
+        Loading = 6,
     }
 }

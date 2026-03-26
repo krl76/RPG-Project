@@ -3,6 +3,7 @@ using Core.StateMachine.States;
 using Cysharp.Threading.Tasks;
 using Features.Combat;
 using Infrastructure.Providers.Configs;
+using Infrastructure.Services.Audio;
 using Infrastructure.Services.Events;
 using Infrastructure.Services.Player.Animator;
 using UnityEngine;
@@ -20,16 +21,19 @@ namespace Features.Player
         private IConfigDataProvider _configDataProvider;
         private IPlayerAnimatorService _playerAnimatorService;
         private IGameStateMachine _gameStateMachine;
+        private ICombatAudioService _combatAudioService;
 
         [Inject]
         private void Construct(
             IConfigDataProvider configDataProvider,
             IPlayerAnimatorService playerAnimatorService,
-            IGameStateMachine gameStateMachine)
+            IGameStateMachine gameStateMachine,
+            ICombatAudioService combatAudioService)
         {
             _configDataProvider = configDataProvider;
             _playerAnimatorService = playerAnimatorService;
             _gameStateMachine = gameStateMachine;
+            _combatAudioService = combatAudioService;
         }
 
         private void Start()
@@ -46,6 +50,7 @@ namespace Features.Player
             }
 
             _currentHealth = Mathf.Max(0, _currentHealth - amount);
+            _combatAudioService.PlayPlayerHit();
 
             EventBus.RaiseEvent<IPlayerHealthSubscriber>(sub =>
                 sub.OnPlayerHealthChanged(_currentHealth, _maxHealth));

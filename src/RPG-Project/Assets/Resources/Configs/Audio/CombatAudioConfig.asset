@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1277e7720d28414ab2a658277da75c60, type: 3}
+  m_Name: CombatAudioConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Data.Configs.CombatAudioConfig
+  PlayerMeleeAttack:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: e47c396d990a0a74ebfda8f181b9a4b9, type: 3}
+  PlayerShot:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: 27565096024c3a74eaa8db3dd5b16252, type: 3}
+  PlayerHit:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: c4abf6925896a7549bc9fcca6f7cc4a2, type: 3}
+  EnemyMeleeAttack:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: c28c687f3ea410849a7785c3bf307920, type: 3}
+  EnemyMagicAttack:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: 4c7b6a284acbbe546a850bfd8350b039, type: 3}
+  EnemyHit:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: f9b0427cbca64a14f80220f634932dfb, type: 3}
