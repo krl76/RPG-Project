@@ -11,10 +11,4 @@ namespace Infrastructure.Services.Events
         void OnMagicUsed(float cooldownDuration);
         void OnMagicReady();
     }
-    
-    public interface IGameStateSubscriber : IGlobalSubscriber
-    {
-        void OnGameOver();
-        void OnGameRestarted();
-    }
 }

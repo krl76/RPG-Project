@@ -1,5 +1,4 @@
 using System;
-using Infrastructure.Services.Events;
 using Infrastructure.Services.Player;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -15,11 +14,9 @@ namespace Infrastructure.Services.Camera
 
         private Transform _cameraTarget;
         private Vector2 _currentRotation;
-        
+
         private CinemachineCamera _cinemachineCamera;
         private CinemachineThirdPersonFollow _thirdPersonFollow;
-
-        private bool _enabled = true;
 
         private readonly IPlayerService _playerService;
 
@@ -27,18 +24,35 @@ namespace Infrastructure.Services.Camera
         {
             _playerService = playerService;
         }
-        
+
         public void InstallService()
         {
+            if (_playerService.PlayerTransform == null)
+            {
+                Debug.LogError("[CameraService] PlayerTransform is not initialized.");
+                return;
+            }
+
             Camera = UnityEngine.Camera.main;
             _cinemachineCamera = Object.FindAnyObjectByType<CinemachineCamera>();
+            if (_cinemachineCamera == null)
+            {
+                Debug.LogError("[CameraService] CinemachineCamera was not found in the active scene.");
+                return;
+            }
+
             CameraObject = _cinemachineCamera.gameObject;
             _thirdPersonFollow = _cinemachineCamera.GetComponent<CinemachineThirdPersonFollow>();
 
-            _cameraTarget = new GameObject("CameraTarget").transform;
-            _cameraTarget.SetParent(_playerService.PlayerTransform);
-            
-            _cameraTarget.localPosition = new Vector3(0, 1.4f, 0); 
+            if (_cameraTarget == null)
+            {
+                _cameraTarget = new GameObject("CameraTarget").transform;
+            }
+
+            _currentRotation = Vector2.zero;
+            _cameraTarget.SetParent(_playerService.PlayerTransform, false);
+            _cameraTarget.localPosition = new Vector3(0, 1.4f, 0);
+            _cameraTarget.localRotation = Quaternion.identity;
 
             _cinemachineCamera.Target.TrackingTarget = _cameraTarget;
         }
@@ -53,10 +67,13 @@ namespace Infrastructure.Services.Camera
 
         public void SetRotationAngle(Vector2 deltaRotation)
         {
-            if (deltaRotation == Vector2.zero) return;
+            if (deltaRotation == Vector2.zero || _cameraTarget == null)
+            {
+                return;
+            }
 
             _currentRotation += deltaRotation;
-            
+
             _currentRotation.x %= 360f;
             _currentRotation.y = Mathf.Clamp(_currentRotation.y, -70f, 70f);
 
@@ -65,7 +82,9 @@ namespace Infrastructure.Services.Camera
             CameraRotationChanged?.Invoke();
         }
 
-        public Quaternion GetCameraRotation() => _cameraTarget.rotation;
+        public Quaternion GetCameraRotation() =>
+            _cameraTarget != null ? _cameraTarget.rotation : Quaternion.identity;
+
         public Vector2 GetCameraAngle() => _currentRotation;
     }
 }

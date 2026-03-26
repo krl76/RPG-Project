@@ -1,6 +1,6 @@
-using System;
-using Infrastructure.Services.Events;
-using Infrastructure.Services.Scene;
+using Core.StateMachine;
+using Core.StateMachine.States;
+using Cysharp.Threading.Tasks;
 using Infrastructure.Services.UI;
 using UI.Base;
 using UnityEngine;
@@ -15,12 +15,19 @@ namespace UI
         public override bool IsPopup => true;
 
         [SerializeField] private Button _restartButton;
-        private ISceneLoaderService _sceneLoader;
+
+        private IGameStateMachine _gameStateMachine;
+
+        [Inject]
+        private void Construct(IGameStateMachine gameStateMachine)
+        {
+            _gameStateMachine = gameStateMachine;
+        }
 
         public override void OnOpen(object payload = null)
         {
             base.OnOpen(payload);
-            
+
             _restartButton.onClick.AddListener(RestartGame);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -34,7 +41,12 @@ namespace UI
 
         private void RestartGame()
         {
-            EventBus.RaiseEvent<IGameStateSubscriber>(sub => sub.OnGameRestarted());
+            RestartGameAsync().Forget();
+        }
+
+        private async UniTask RestartGameAsync()
+        {
+            await _gameStateMachine.Enter<LoadGameState>();
         }
     }
 }

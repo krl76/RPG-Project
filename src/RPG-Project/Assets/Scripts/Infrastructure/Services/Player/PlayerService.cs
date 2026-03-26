@@ -1,5 +1,4 @@
 using Features.Player;
-using prototype_Roma.Scripts;
 using UnityEngine;
 
 namespace Infrastructure.Services.Player
@@ -8,10 +7,19 @@ namespace Infrastructure.Services.Player
     {
         public GameObject PlayerObject { get; private set; }
         public Transform PlayerTransform { get; private set; }
-        
+
         public void InstallService()
         {
-            PlayerObject = Object.FindAnyObjectByType<PlayerMovement>().gameObject;
+            var playerMovement = Object.FindAnyObjectByType<PlayerMovement>();
+            if (playerMovement == null)
+            {
+                Debug.LogError("[PlayerService] PlayerMovement was not found in the active scene.");
+                PlayerObject = null;
+                PlayerTransform = null;
+                return;
+            }
+
+            PlayerObject = playerMovement.gameObject;
             PlayerTransform = PlayerObject.transform;
         }
     }
