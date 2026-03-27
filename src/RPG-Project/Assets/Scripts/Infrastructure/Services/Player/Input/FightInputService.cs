@@ -14,9 +14,16 @@ namespace Infrastructure.Services.Player.Input
 {
     public class FightInputService : IFightInputService
     {
+        public float MagicCooldownRemaining =>
+            _isMagicAttackAvailable ? 0f : Mathf.Max(0f, _magicCooldownEndTime - Time.time);
+
+        public float MagicCooldownDuration => _magicCooldownDuration;
+
         private bool _isAttackStarted = false;
         private bool _isMagicAttackAvailable = true;
         private bool _isAiming;
+        private float _magicCooldownEndTime;
+        private float _magicCooldownDuration;
         private CancellationTokenSource _cancellationTokenSource;
 
         private PlayerMovement _movement;
@@ -110,8 +117,12 @@ namespace Infrastructure.Services.Player.Input
             _isAiming = false;
             
             _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = new CancellationTokenSource();
-            WaitMagicCooldown(_cancellationTokenSource).Forget();
+            WaitMagicCooldown(
+                _config.MagicAttackCooldown,
+                _config.MagicAttackCooldown,
+                _cancellationTokenSource).Forget();
             
             _animatorService.TriggerMagicAttack();
         }
@@ -128,15 +139,42 @@ namespace Infrastructure.Services.Player.Input
             return true;
         }
 
-        private async UniTask WaitMagicCooldown(CancellationTokenSource cts)
+        public void RestoreMagicCooldown(float remainingTime, float totalDuration)
+        {
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+
+            if (remainingTime <= 0f || totalDuration <= 0f)
+            {
+                _isMagicAttackAvailable = true;
+                _magicCooldownDuration = 0f;
+                _magicCooldownEndTime = 0f;
+                EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicReady());
+                return;
+            }
+
+            _cancellationTokenSource = new CancellationTokenSource();
+            WaitMagicCooldown(remainingTime, totalDuration, _cancellationTokenSource).Forget();
+        }
+
+        private async UniTask WaitMagicCooldown(float remainingTime, float totalDuration, CancellationTokenSource cts)
         {
             _isMagicAttackAvailable = false;
-            
-            EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicUsed(_config.MagicAttackCooldown));
+            _magicCooldownDuration = totalDuration;
+            _magicCooldownEndTime = Time.time + remainingTime;
 
-            bool isCancelled = await UniTask.Delay(TimeSpan.FromSeconds(_config.MagicAttackCooldown), cancellationToken: cts.Token).SuppressCancellationThrow();
+            EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicUsed(remainingTime, totalDuration));
+
+            bool isCancelled = await UniTask.Delay(TimeSpan.FromSeconds(remainingTime), cancellationToken: cts.Token)
+                .SuppressCancellationThrow();
+            if (isCancelled)
+            {
+                return;
+            }
+
             _isMagicAttackAvailable = true;
-            if (isCancelled) return;
+            _magicCooldownEndTime = 0f;
             EventBus.RaiseEvent<IPlayerMagicSubscriber>(sub => sub.OnMagicReady());
         }
 
@@ -145,6 +183,8 @@ namespace Infrastructure.Services.Player.Input
             _isAttackStarted = false;
             _isAiming = false;
             _isMagicAttackAvailable = true;
+            _magicCooldownEndTime = 0f;
+            _magicCooldownDuration = 0f;
 
             _movementInputService.CanMove = true;
         }

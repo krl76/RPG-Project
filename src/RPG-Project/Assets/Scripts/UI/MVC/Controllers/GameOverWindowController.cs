@@ -1,3 +1,4 @@
+using Core.Gameplay.Save;
 using Core.StateMachine;
 using Core.StateMachine.States;
 using Cysharp.Threading.Tasks;
@@ -9,12 +10,14 @@ namespace UI.MVC.Controllers
     public sealed class GameOverWindowController
     {
         private readonly IGameStateMachine _gameStateMachine;
+        private readonly IGameSaveInteractor _gameSaveInteractor;
 
         private IGameOverView _view;
 
-        public GameOverWindowController(IGameStateMachine gameStateMachine)
+        public GameOverWindowController(IGameStateMachine gameStateMachine, IGameSaveInteractor gameSaveInteractor)
         {
             _gameStateMachine = gameStateMachine;
+            _gameSaveInteractor = gameSaveInteractor;
         }
 
         public void Attach(IGameOverView view)
@@ -53,6 +56,7 @@ namespace UI.MVC.Controllers
 
         private async UniTask RestartGameAsync()
         {
+            _gameSaveInteractor.ClearPendingRestore();
             await _gameStateMachine.Enter<LoadGameState>();
         }
 

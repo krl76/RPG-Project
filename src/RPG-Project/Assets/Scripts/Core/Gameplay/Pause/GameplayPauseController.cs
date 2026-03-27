@@ -1,4 +1,5 @@
 using System;
+using Core.Gameplay.Save;
 using Core.Gameplay.State;
 using Core.StateMachine;
 using Core.StateMachine.States;
@@ -17,17 +18,20 @@ namespace Core.Gameplay.Pause
         private readonly IGameStateMachine _gameStateMachine;
         private readonly IWindowService _windowService;
         private readonly InputManager _inputManager;
+        private readonly IGameSaveInteractor _gameSaveInteractor;
 
         public GameplayPauseController(
             IGameStateService gameStateService,
             IGameStateMachine gameStateMachine,
             IWindowService windowService,
-            InputManager inputManager)
+            InputManager inputManager,
+            IGameSaveInteractor gameSaveInteractor)
         {
             _gameStateService = gameStateService;
             _gameStateMachine = gameStateMachine;
             _windowService = windowService;
             _inputManager = inputManager;
+            _gameSaveInteractor = gameSaveInteractor;
 
             _gameStateService.StateChanged += OnGameStateChanged;
         }
@@ -97,6 +101,21 @@ namespace Core.Gameplay.Pause
             Cursor.visible = false;
         }
 
+        public void SaveGame()
+        {
+            if (_gameStateService.CurrentState != GameState.Paused)
+            {
+                return;
+            }
+
+            _gameSaveInteractor.SaveGame();
+        }
+
+        public void LoadGame()
+        {
+            LoadGameAsync().Forget();
+        }
+
         public void OpenSettings()
         {
             if (_gameStateService.CurrentState != GameState.Paused || _windowService.IsWindowOpened(WindowID.Settings))
@@ -126,6 +145,22 @@ namespace Core.Gameplay.Pause
         {
             PrepareForSceneTransition();
             await _gameStateMachine.Enter<LoadMainMenuState>();
+        }
+
+        private async UniTask LoadGameAsync()
+        {
+            if (_gameStateService.CurrentState != GameState.Paused)
+            {
+                return;
+            }
+
+            if (_gameSaveInteractor.PrepareLoadGame() == false)
+            {
+                return;
+            }
+
+            PrepareForSceneTransition();
+            await _gameStateMachine.Enter<LoadGameState>();
         }
 
         private void PrepareForSceneTransition()

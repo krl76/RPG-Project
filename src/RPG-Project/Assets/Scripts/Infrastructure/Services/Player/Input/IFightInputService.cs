@@ -2,8 +2,11 @@ namespace Infrastructure.Services.Player.Input
 {
     public interface IFightInputService
     {
-        public void InstallService();
-        public void UninstallService();
-        public void AttackEnd();
+        float MagicCooldownRemaining { get; }
+        float MagicCooldownDuration { get; }
+        void InstallService();
+        void UninstallService();
+        void AttackEnd();
+        void RestoreMagicCooldown(float remainingTime, float totalDuration);
     }
 }

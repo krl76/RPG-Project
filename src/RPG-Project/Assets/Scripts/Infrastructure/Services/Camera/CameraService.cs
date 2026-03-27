@@ -72,13 +72,21 @@ namespace Infrastructure.Services.Camera
                 return;
             }
 
-            _currentRotation += deltaRotation;
+            SetCameraAngle(_currentRotation + deltaRotation);
+        }
 
+        public void SetCameraAngle(Vector2 rotation)
+        {
+            if (_cameraTarget == null)
+            {
+                return;
+            }
+
+            _currentRotation = rotation;
             _currentRotation.x %= 360f;
             _currentRotation.y = Mathf.Clamp(_currentRotation.y, -70f, 70f);
 
             _cameraTarget.localRotation = Quaternion.Euler(_currentRotation.y, 0, 0);
-
             CameraRotationChanged?.Invoke();
         }
 

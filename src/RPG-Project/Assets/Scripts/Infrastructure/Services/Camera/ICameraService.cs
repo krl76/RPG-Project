@@ -10,6 +10,7 @@ namespace Infrastructure.Services.Camera
         UnityEngine.Camera Camera { get; }
         void InstallService();
         void ChangeDistance(float newDistance);
+        void SetCameraAngle(Vector2 rotation);
         void SetRotationAngle(Vector2 deltaRotation); 
         Quaternion GetCameraRotation();
         Vector2 GetCameraAngle();

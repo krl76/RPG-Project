@@ -1,3 +1,4 @@
+using Core.Gameplay.Save;
 using Core.StateMachine;
 using Core.StateMachine.States;
 using Cysharp.Threading.Tasks;
@@ -13,15 +14,18 @@ namespace UI.MVC.Controllers
     public sealed class MainMenuWindowController
     {
         private readonly IGameStateMachine _gameStateMachine;
+        private readonly IGameSaveInteractor _gameSaveInteractor;
         private readonly IWindowService _windowService;
 
         private IMainMenuView _view;
 
         public MainMenuWindowController(
             IGameStateMachine gameStateMachine,
+            IGameSaveInteractor gameSaveInteractor,
             IWindowService windowService)
         {
             _gameStateMachine = gameStateMachine;
+            _gameSaveInteractor = gameSaveInteractor;
             _windowService = windowService;
         }
 
@@ -74,6 +78,7 @@ namespace UI.MVC.Controllers
 
         private async UniTask StartGameAsync()
         {
+            _gameSaveInteractor.ClearPendingRestore();
             await _gameStateMachine.Enter<LoadGameState>();
         }
     }
