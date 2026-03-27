@@ -1,12 +1,14 @@
 using Core.Bootstrap.Scenes.Game;
 using Core.Bootstrap.Scenes.MainMenu;
 using Core.Gameplay.Pause;
+using Core.Gameplay.Save;
 using Core.Gameplay.State;
 using Core.StateMachine;
 using Core.StateMachine.States;
 using Infrastructure.Factories.Objects;
 using Infrastructure.Factories.UI;
 using Infrastructure.Providers.Configs;
+using Infrastructure.Repositories.Save;
 using Infrastructure.Services.Audio;
 using Infrastructure.Services.Camera;
 using Infrastructure.Services.Enemy;
@@ -45,6 +47,8 @@ namespace Infrastructure.Installers
         {
             Container.Bind<IConfigDataProvider>().To<ConfigDataProvider>().AsSingle();
             Container.Bind<ISceneLoaderService>().To<SceneLoaderService>().AsSingle();
+            Container.Bind<IGameSaveRepository>().To<JsonGameSaveRepository>().AsSingle();
+            Container.Bind<IGameSaveInteractor>().To<GameSaveInteractor>().AsSingle();
         }
 
         private void BindCoreState()

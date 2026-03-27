@@ -1,4 +1,5 @@
 using Core.Gameplay.Pause;
+using Core.Gameplay.Save;
 using Infrastructure.Factories.Objects;
 using Infrastructure.Services.Camera;
 using Infrastructure.Services.Player;
@@ -20,6 +21,7 @@ namespace Core.Bootstrap.Scenes.Game
         private readonly IWindowService _windowService;
         private readonly IGameObjectFactory _gameObjectFactory;
         private readonly GameplayPauseController _gameplayPauseController;
+        private readonly IGameSaveInteractor _gameSaveInteractor;
 
         private bool _isGameplayInstalled;
 
@@ -32,7 +34,8 @@ namespace Core.Bootstrap.Scenes.Game
             InputManager inputManager,
             IWindowService windowService,
             IGameObjectFactory gameObjectFactory,
-            GameplayPauseController gameplayPauseController)
+            GameplayPauseController gameplayPauseController,
+            IGameSaveInteractor gameSaveInteractor)
         {
             _playerService = playerService;
             _playerAnimatorService = playerAnimatorService;
@@ -43,6 +46,7 @@ namespace Core.Bootstrap.Scenes.Game
             _windowService = windowService;
             _gameObjectFactory = gameObjectFactory;
             _gameplayPauseController = gameplayPauseController;
+            _gameSaveInteractor = gameSaveInteractor;
         }
 
         public bool Initialize()
@@ -63,12 +67,14 @@ namespace Core.Bootstrap.Scenes.Game
             _fightInputService.InstallService();
             _cameraService.InstallService();
             _movementInputService.InstallService();
-            _inputManager.ChangeState(_inputManager.GameplayInputState);
 
             if (_windowService.IsWindowOpened(WindowID.HUD) == false)
             {
                 _windowService.Open(WindowID.HUD);
             }
+
+            _gameSaveInteractor.ApplyPendingGameState();
+            _inputManager.ChangeState(_inputManager.GameplayInputState);
 
             _isGameplayInstalled = true;
             return true;

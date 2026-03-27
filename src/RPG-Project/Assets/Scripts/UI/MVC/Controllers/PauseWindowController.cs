@@ -20,6 +20,8 @@ namespace UI.MVC.Controllers
 
             _view = view;
             _view.ResumeRequested += OnResumeRequested;
+            _view.SaveRequested += OnSaveRequested;
+            _view.LoadRequested += OnLoadRequested;
             _view.SettingsRequested += OnSettingsRequested;
             _view.ExitToMainMenuRequested += OnExitToMainMenuRequested;
         }
@@ -32,12 +34,16 @@ namespace UI.MVC.Controllers
             }
 
             _view.ResumeRequested -= OnResumeRequested;
+            _view.SaveRequested -= OnSaveRequested;
+            _view.LoadRequested -= OnLoadRequested;
             _view.SettingsRequested -= OnSettingsRequested;
             _view.ExitToMainMenuRequested -= OnExitToMainMenuRequested;
             _view = null;
         }
 
         private void OnResumeRequested() => _gameplayPauseController.Resume();
+        private void OnSaveRequested() => _gameplayPauseController.SaveGame();
+        private void OnLoadRequested() => _gameplayPauseController.LoadGame();
         private void OnSettingsRequested() => _gameplayPauseController.OpenSettings();
         private void OnExitToMainMenuRequested() => _gameplayPauseController.ExitToMainMenu();
     }

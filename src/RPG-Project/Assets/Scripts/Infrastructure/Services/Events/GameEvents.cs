@@ -8,7 +8,7 @@ namespace Infrastructure.Services.Events
 
     public interface IPlayerMagicSubscriber : IGlobalSubscriber
     {
-        void OnMagicUsed(float cooldownDuration);
+        void OnMagicUsed(float remainingTime, float totalDuration);
         void OnMagicReady();
     }
 }

@@ -1,3 +1,5 @@
+using Core.Gameplay.Save;
+using Core.Gameplay.Save.Data;
 using Data.Configs;
 using Features.Combat;
 using Infrastructure.Factories.Objects;
@@ -14,6 +16,8 @@ namespace Features.Enemy
     public class EnemyAI : MonoBehaviour, IDamageable
     {
         public bool IsAlive => _currentHealth > 0;
+        public float CurrentHealth => _currentHealth;
+        public string SaveId => SceneObjectSaveId.Build(transform);
         [field: SerializeField] public EnemyConfig Config;
 
         [Header("References")]
@@ -171,22 +175,82 @@ namespace Features.Enemy
                 return;
             }
 
-            _currentHealth -= amount;
+            _currentHealth = Mathf.Max(0f, _currentHealth - amount);
             _combatAudioService.PlayEnemyHit();
 
-            _healthFeedback.OnHealthChanged(_currentHealth, Config.MaxHealth);
+            _healthFeedback?.OnHealthChanged(_currentHealth, Config.MaxHealth);
 
             if (_currentHealth <= 0)
             {
                 _agent.isStopped = true;
                 _animator.PlayDeath();
                 GetComponent<Collider>().enabled = false;
+                _enemyService.MarkDead(this);
                 Destroy(gameObject, 3f);
             }
             else
             {
                 _animator.PlayHit();
             }
+        }
+
+        public EnemySaveData CaptureSaveData() =>
+            new EnemySaveData
+            {
+                Id = SaveId,
+                IsAlive = IsAlive,
+                CurrentHealth = Mathf.Max(0f, _currentHealth),
+                MaxHealth = Config != null ? Config.MaxHealth : 0f,
+                Position = Vector3SaveData.FromVector3(transform.position),
+                Rotation = Vector3SaveData.FromVector3(transform.eulerAngles)
+            };
+
+        public void ApplySaveData(EnemySaveData data)
+        {
+            if (data == null)
+            {
+                return;
+            }
+
+            SetPositionAndRotation(data.Position.ToVector3(), Quaternion.Euler(data.Rotation.ToVector3()));
+            _currentHealth = Mathf.Clamp(data.CurrentHealth, 0f, Config.MaxHealth);
+            _healthFeedback?.OnHealthChanged(_currentHealth, Config.MaxHealth);
+
+            if (data.IsAlive == false || _currentHealth <= 0f)
+            {
+                _enemyService.MarkDead(this);
+                Destroy(gameObject);
+                return;
+            }
+
+            if (TryGetComponent<Collider>(out var collider))
+            {
+                collider.enabled = true;
+            }
+
+            _agent.isStopped = false;
+            _agent.ResetPath();
+        }
+
+        private void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+        {
+            if (_agent != null && _agent.enabled)
+            {
+                if (NavMesh.SamplePosition(position, out var hit, 2f, NavMesh.AllAreas))
+                {
+                    _agent.Warp(hit.position);
+                }
+                else
+                {
+                    transform.position = position;
+                }
+            }
+            else
+            {
+                transform.position = position;
+            }
+
+            transform.rotation = rotation;
         }
     }
 }

@@ -257,6 +257,29 @@ namespace Features.Player
             yield return new WaitForSeconds(0.5f);
             _hitSlow = 1;
         }
+
+        public void Warp(Vector3 position, Quaternion rotation)
+        {
+            _currentMovement = Vector3.zero;
+            _rotatedMovement = Vector2.zero;
+            _currentAnimVector = Vector2.zero;
+            _animVelocity = Vector2.zero;
+            _currentTurnValue = 0f;
+
+            bool controllerWasEnabled = _characterController != null && _characterController.enabled;
+            if (controllerWasEnabled)
+            {
+                _characterController.enabled = false;
+            }
+
+            transform.SetPositionAndRotation(position, rotation);
+
+            if (controllerWasEnabled)
+            {
+                _characterController.enabled = true;
+            }
+        }
+
         private void ChangePlayerRotation()
         {
             float targetYaw = _cameraService.GetCameraAngle().x;

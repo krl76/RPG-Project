@@ -46,17 +46,24 @@ namespace UI
             _hpText.text = $"{Mathf.CeilToInt(currentHealth)} / {maxHealth}";
         }
 
-        public void StartMagicCooldown(float cooldownDuration)
+        public void SetMagicCooldown(float remainingTime, float totalDuration)
         {
+            if (remainingTime <= 0f || totalDuration <= 0f)
+            {
+                CompleteMagicCooldown();
+                return;
+            }
+
             _isCooldownActive = true;
-            _cooldownTimer = 0f;
-            _cooldownDuration = cooldownDuration;
-            _magicIcon.fillAmount = 0f;
+            _cooldownDuration = totalDuration;
+            _cooldownTimer = Mathf.Clamp(totalDuration - remainingTime, 0f, totalDuration);
+            _magicIcon.fillAmount = Mathf.Clamp01(_cooldownTimer / _cooldownDuration);
         }
 
         public void CompleteMagicCooldown()
         {
             _isCooldownActive = false;
+            _cooldownTimer = _cooldownDuration;
             _magicIcon.fillAmount = 1f;
         }
 

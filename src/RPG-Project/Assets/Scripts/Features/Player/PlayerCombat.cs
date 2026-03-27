@@ -69,7 +69,7 @@ namespace Features.Player
             }
         }
 
-        public void OnMagicUsed(float cooldownDuration)
+        public void OnMagicUsed(float remainingTime, float totalDuration)
         {
             var config = _configDataProvider.GetPlayerStatsConfig();
             _combatAudioService.PlayPlayerShot();
