@@ -79,6 +79,7 @@ namespace Infrastructure.Installers
             Container.Bind<IMovementInputService>().To<MovementInputService>().AsSingle();
             Container.Bind<IPlayerAnimatorService>().To<PlayerAnimatorService>().AsSingle();
             Container.Bind<IEnemyService>().To<EnemyService>().AsSingle();
+            Container.Bind<IEnemyModeService>().To<EnemyModeService>().AsSingle();
         }
 
         private void BindUIServices()

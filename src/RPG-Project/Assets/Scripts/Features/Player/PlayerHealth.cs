@@ -39,7 +39,7 @@ namespace Features.Player
             _combatAudioService = combatAudioService;
         }
 
-        private void Awake()
+        private void Start()
         {
             _maxHealth = _configDataProvider.GetPlayerStatsConfig().InitialHealth;
             _currentHealth = _maxHealth;

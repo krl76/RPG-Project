@@ -10,6 +10,7 @@ namespace Infrastructure.Providers.Configs
 {
     public class ConfigDataProvider : IConfigDataProvider, IInitializable
     {
+        private GameConfig _gameConfig;
         private WindowsConfig _windowsConfig;
         private PlayerStatsConfig _playerStatsConfig;
         private CombatAudioConfig _combatAudioConfig;
@@ -17,6 +18,8 @@ namespace Infrastructure.Providers.Configs
         public void Initialize() => Load();
         public void Load()
         {
+            _gameConfig = Resources.LoadAll<GameConfig>(ConfigPaths.GAME_CONFIG_PATH).FirstOrDefault();
+
             _windowsConfig = Resources.LoadAll<WindowsConfig>(ConfigPaths.WINDOWS_CONFIG_PATH).FirstOrDefault();
             
             _playerStatsConfig = Resources.LoadAll<PlayerStatsConfig>(ConfigPaths.PLAYERSTATS_CONFIG_PATH).FirstOrDefault();
@@ -26,7 +29,8 @@ namespace Infrastructure.Providers.Configs
             _enemies = Resources.LoadAll<EnemyConfig>(ConfigPaths.ENEMIES_CONFIG_PATH)
                 .ToDictionary(x => x.Id, x => x);
             
-            Debug.Log($"[ConfigDataProvider] Loaded {_windowsConfig.windows.Count} UI windows.");
+            Debug.Log($"[ConfigDataProvider] GameConfig loaded: {_gameConfig != null}.");
+            Debug.Log($"[ConfigDataProvider] Loaded {_windowsConfig?.windows.Count} UI windows.");
             Debug.Log($"[ConfigDataProvider] Loaded {_enemies.Values.Count} enemies.");
         }
 
@@ -36,6 +40,7 @@ namespace Infrastructure.Providers.Configs
             return record.prefab;
         }
 
+        public GameConfig GetGameConfig() => _gameConfig;
         public PlayerStatsConfig GetPlayerStatsConfig() => _playerStatsConfig;
         public EnemyConfig GetEnemyConfig(int id) => _enemies.TryGetValue(id, out var config) ? config : null;
         public CombatAudioConfig GetCombatAudioConfig() => _combatAudioConfig;

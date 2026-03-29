@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,133 +8,348 @@ namespace Features.Enemy
     [RequireComponent(typeof(Animator))]
     public class EnemyAnimation : MonoBehaviour
     {
-        private static readonly int MoveSpeedHash = Animator.StringToHash(AnimationID.WALK_SPEED);
+        private static readonly int WalkSpeedHash = Animator.StringToHash(AnimationID.WALK_SPEED);
         private static readonly int RunSpeedHash = Animator.StringToHash(AnimationID.RUN_SPEED);
         private static readonly int AttackSpeedHash = Animator.StringToHash(AnimationID.ATTACK_SPEED);
-        
+
         private static readonly int WalkHash = Animator.StringToHash(AnimationID.WALK);
         private static readonly int RunHash = Animator.StringToHash(AnimationID.RUN);
-        private static readonly int IdleHash = Animator.StringToHash(AnimationID.IDLE);
+        private static readonly int FleeHash = Animator.StringToHash(AnimationID.FLEE);
+
         private static readonly int AttackHash = Animator.StringToHash(AnimationID.ATTACK);
         private static readonly int MagicAttackHash = Animator.StringToHash(AnimationID.MAGIC_ATTACK);
+        private static readonly int StrongAttackHash = Animator.StringToHash(AnimationID.STRONG_ATTACK);
+        private static readonly int AirAttackHash = Animator.StringToHash(AnimationID.AIR_ATTACK);
+        private static readonly int AggressionHash = Animator.StringToHash(AnimationID.AGGRESSION);
+        private static readonly int EnrageHash = Animator.StringToHash(AnimationID.ENRAGE);
         private static readonly int HitHash = Animator.StringToHash(AnimationID.HIT);
         private static readonly int DeathHash = Animator.StringToHash(AnimationID.DEATH);
 
-        public event Action OnAttackReachEnd;
-        public event Action OnAttackExit;
+        public event Action OnAttackImpact;
+        public event Action OnStrongAttackImpact;
+        public event Action OnAirAttackImpact;
+        public event Action OnAttackEffectCompleted;
+        public event Action OnActionCompleted;
 
-        private Animator Animator { get; set; }
-        private Dictionary<string, AnimationStateMachine> States { get; set; }
-
-        private void Awake() => 
-            Initialize();
-
-        private void OnDestroy()
+        private readonly int[] _idleStateHashes =
         {
-            if (States == null)
-                return;
-            if (States.TryGetValue(AnimationID.ATTACK, out var state))
-            {
-                state.OnExit -= AttackAnimationExit;
-                state.OnReachEnd -= AttackAnimationReachEnd;
-            }
-        }
-
-        private void Initialize()
+            Animator.StringToHash("Base Layer.Idle01"),
+            Animator.StringToHash("Base Layer.Idle"),
+            Animator.StringToHash("Base Layer.Sleep")
+        };
+        private readonly int[] _idleShortStateHashes =
         {
-            Animator = GetComponent<Animator>();
-            var stateMachineBehaviours = Animator.GetBehaviours<AnimationStateMachine>();
-            States = stateMachineBehaviours.ToDictionary(x => x.StateName, x => x);
-            InitializeEvents();
-        }
+            Animator.StringToHash("Idle01"),
+            Animator.StringToHash("Idle"),
+            Animator.StringToHash("Sleep")
+        };
 
-        private void InitializeEvents()
+        private readonly int[] _runStateHashes =
         {
-            if (States.TryGetValue(AnimationID.ATTACK, out var state))
-            {
-                state.OnExit += AttackAnimationExit;
-                state.OnReachEnd += AttackAnimationReachEnd;
-            }
+            Animator.StringToHash("Base Layer.Run"),
+            Animator.StringToHash("Base Layer.Walk")
+        };
+        private readonly int[] _runShortStateHashes =
+        {
+            Animator.StringToHash("Run"),
+            Animator.StringToHash("Walk")
+        };
+
+        private Animator _animator;
+        private HashSet<int> _availableParameters;
+
+        private void Awake()
+        {
+            EnsureInitialized();
         }
 
         public void SetIsWalking(bool isWalking)
         {
-            Animator.SetBool(WalkHash, isWalking);
-        }
-        
-        public void SetIsRunning(bool isRunning)
-        {
-            Animator.SetBool(RunHash, isRunning);
-        }
-        
-        public void PlayIdle()
-        {
-            Animator.SetTrigger(IdleHash);
+            EnsureInitialized();
+            SetBoolIfExists(WalkHash, isWalking);
         }
 
-        public void PlayAttack()
+        public void SetIsRunning(bool isRunning)
         {
-            Animator.SetTrigger(AttackHash);
+            EnsureInitialized();
+            SetBoolIfExists(RunHash, isRunning);
         }
-        
-        public void PlayMagicAttack()
+
+        public void SetIsFleeing(bool isFleeing)
         {
-            Animator.SetTrigger(MagicAttackHash);
+            EnsureInitialized();
+            SetBoolIfExists(FleeHash, isFleeing);
+        }
+
+        public void PlayAttack(bool isRangedAttack)
+        {
+            EnsureInitialized();
+            ResetActionTriggers();
+            int preferredHash = isRangedAttack ? MagicAttackHash : AttackHash;
+            int fallbackHash = isRangedAttack ? AttackHash : MagicAttackHash;
+
+            if (SetTriggerIfExists(preferredHash))
+            {
+                return;
+            }
+
+            SetTriggerIfExists(fallbackHash);
+        }
+
+        public void PlayStrongAttack()
+        {
+            EnsureInitialized();
+            ResetActionTriggers();
+            if (SetTriggerIfExists(StrongAttackHash))
+            {
+                return;
+            }
+
+            if (SetTriggerIfExists(MagicAttackHash))
+            {
+                return;
+            }
+
+            SetTriggerIfExists(AttackHash);
+        }
+
+        public void PlayAirAttack()
+        {
+            EnsureInitialized();
+            ResetActionTriggers();
+            if (SetTriggerIfExists(AirAttackHash))
+            {
+                return;
+            }
+
+            if (SetTriggerIfExists(StrongAttackHash))
+            {
+                return;
+            }
+
+            SetTriggerIfExists(MagicAttackHash);
+        }
+
+        public void PlayAggression()
+        {
+            EnsureInitialized();
+            ResetActionTriggers();
+            SetTriggerIfExists(AggressionHash);
+        }
+
+        public void PlayEnrage()
+        {
+            EnsureInitialized();
+            ResetActionTriggers();
+            SetTriggerIfExists(EnrageHash);
         }
 
         public void PlayHit()
         {
-            Animator.SetTrigger(HitHash);
+            EnsureInitialized();
+            ResetActionTriggers();
+            SetTriggerIfExists(HitHash);
         }
 
         public void PlayDeath()
         {
-            Animator.SetTrigger(DeathHash);
+            EnsureInitialized();
+            ResetActionTriggers();
+            SetTriggerIfExists(DeathHash);
         }
 
         public void SetWalkSpeed(float speed)
         {
-            Animator.SetFloat(MoveSpeedHash, speed);
-        }
-        
-        public void SetRunSpeed(float speed)
-        {
-            Animator.SetFloat(RunSpeedHash, speed);
-        }
-        
-        public void SetAttackSpeed(float speed)
-        {
-            Animator.SetFloat(AttackSpeedHash, speed);
+            EnsureInitialized();
+            SetFloatIfExists(WalkSpeedHash, speed);
         }
 
-        public void ResetIdleTrigger()
+        public void SetRunSpeed(float speed)
         {
-            Animator.ResetTrigger(IdleHash);
+            EnsureInitialized();
+            SetFloatIfExists(RunSpeedHash, speed);
         }
-        
-        public void ResetAttackTrigger()
+
+        public void SetAttackSpeed(float speed)
         {
-            Animator.ResetTrigger(AttackHash);
+            EnsureInitialized();
+            SetFloatIfExists(AttackSpeedHash, speed);
         }
-        
-        public void ResetRunTrigger()
+
+        public void ProcessAnimationEvent(string eventId)
         {
-            Animator.ResetTrigger(RunSpeedHash);
+            switch (eventId)
+            {
+                case "AttackImpact":
+                case "OnAttackImpact":
+                    OnAttackImpact?.Invoke();
+                    break;
+                case "StrongAttackImpact":
+                case "OnStrongAttackImpact":
+                    OnStrongAttackImpact?.Invoke();
+                    break;
+                case "AirAttackImpact":
+                case "OnAirAttackImpact":
+                    OnAirAttackImpact?.Invoke();
+                    break;
+                case "AttackEffectCompleted":
+                case "StrongAttackCompleted":
+                case "AirAttackCompleted":
+                case "OnAttackEffectCompleted":
+                case "OnStrongAttackCompleted":
+                case "OnAirAttackCompleted":
+                    OnAttackEffectCompleted?.Invoke();
+                    break;
+                case "ActionCompleted":
+                case "AggressionCompleted":
+                case "EnrageCompleted":
+                case "OnActionCompleted":
+                case "OnAggressionCompleted":
+                case "OnEnrageCompleted":
+                    OnActionCompleted?.Invoke();
+                    break;
+            }
         }
-        
-        public void ResetWalkTrigger()
+
+        public void SyncLocomotionState(bool isMoving)
         {
-            Animator.ResetTrigger(WalkHash);
+            EnsureInitialized();
+
+            AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
+            int[] shortStateHashes = isMoving ? _runShortStateHashes : _idleShortStateHashes;
+            for (int i = 0; i < shortStateHashes.Length; i++)
+            {
+                if (currentState.shortNameHash == shortStateHashes[i])
+                {
+                    return;
+                }
+            }
+
+            if (_animator.IsInTransition(0))
+            {
+                AnimatorStateInfo nextState = _animator.GetNextAnimatorStateInfo(0);
+                for (int i = 0; i < shortStateHashes.Length; i++)
+                {
+                    if (nextState.shortNameHash == shortStateHashes[i])
+                    {
+                        return;
+                    }
+                }
+            }
+
+            int[] stateHashes = isMoving ? _runStateHashes : _idleStateHashes;
+            for (int i = 0; i < stateHashes.Length; i++)
+            {
+                int stateHash = stateHashes[i];
+                if (_animator.HasState(0, stateHash) == false)
+                {
+                    continue;
+                }
+
+                _animator.CrossFade(stateHash, 0.12f, 0);
+                return;
+            }
         }
-        
-        private void AttackAnimationExit()
+
+        public bool IsCurrentStateOrTransitioningTo(string shortStateName)
         {
-            OnAttackExit?.Invoke();
+            EnsureInitialized();
+
+            int stateHash = Animator.StringToHash(shortStateName);
+            if (_animator.GetCurrentAnimatorStateInfo(0).shortNameHash == stateHash)
+            {
+                return true;
+            }
+
+            return _animator.IsInTransition(0)
+                && _animator.GetNextAnimatorStateInfo(0).shortNameHash == stateHash;
         }
-        
-        private void AttackAnimationReachEnd()
+
+        public bool IsAnyCurrentStateOrTransitioningTo(params string[] shortStateNames)
         {
-            OnAttackReachEnd?.Invoke();
+            EnsureInitialized();
+
+            AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
+            for (int i = 0; i < shortStateNames.Length; i++)
+            {
+                if (currentState.shortNameHash == Animator.StringToHash(shortStateNames[i]))
+                {
+                    return true;
+                }
+            }
+
+            if (_animator.IsInTransition(0) == false)
+            {
+                return false;
+            }
+
+            AnimatorStateInfo nextState = _animator.GetNextAnimatorStateInfo(0);
+            for (int i = 0; i < shortStateNames.Length; i++)
+            {
+                if (nextState.shortNameHash == Animator.StringToHash(shortStateNames[i]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void EnsureInitialized()
+        {
+            if (_animator != null && _availableParameters != null)
+            {
+                return;
+            }
+
+            _animator = GetComponent<Animator>();
+            _availableParameters = new HashSet<int>(_animator.parameters.Select(parameter => parameter.nameHash));
+        }
+
+        private void SetBoolIfExists(int hash, bool value)
+        {
+            if (_availableParameters.Contains(hash))
+            {
+                _animator.SetBool(hash, value);
+            }
+        }
+
+        private void SetFloatIfExists(int hash, float value)
+        {
+            if (_availableParameters.Contains(hash))
+            {
+                _animator.SetFloat(hash, value);
+            }
+        }
+
+        private bool SetTriggerIfExists(int hash)
+        {
+            if (_availableParameters.Contains(hash) == false)
+            {
+                return false;
+            }
+
+            _animator.SetTrigger(hash);
+            return true;
+        }
+
+        private void ResetActionTriggers()
+        {
+            ResetTriggerIfExists(AttackHash);
+            ResetTriggerIfExists(MagicAttackHash);
+            ResetTriggerIfExists(StrongAttackHash);
+            ResetTriggerIfExists(AirAttackHash);
+            ResetTriggerIfExists(AggressionHash);
+            ResetTriggerIfExists(EnrageHash);
+            ResetTriggerIfExists(HitHash);
+        }
+
+        private void ResetTriggerIfExists(int hash)
+        {
+            if (_availableParameters.Contains(hash))
+            {
+                _animator.ResetTrigger(hash);
+            }
         }
     }
 }

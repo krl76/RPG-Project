@@ -14,11 +14,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Data.Configs.EnemyConfig
   Id: 2
   Type: 1
+  BehaviourType: 0
   MaxHealth: 50
   Damage: 30
+  FleeHealthThreshold: 0.2
+  EnrageHealthThreshold: 0.35
   ChaseRange: 15
+  DisengageRange: 14
+  FleeDistance: 8
+  FleeRepathInterval: 0.5
+  RotationSpeed: 8
+  ChaseSpeedMultiplier: 1
+  FleeSpeedMultiplier: 1.2
+  EnragedSpeedMultiplier: 1.15
   AttackRange: 8
+  StrongAttackRange: 6
   AttackCooldown: 5
+  StrongAttackCooldown: 5
   HitRadius: 0.5
+  StrongAttackDamageMultiplier: 1.8
+  StrongAttackHitRadiusMultiplier: 1.5
+  EnragedDamageMultiplier: 1.25
+  RecoverDuration: 1
   ProjectilePrefab: {fileID: 3006659048013178604, guid: 8ce934b3bc583b449af649a274207705, type: 3}
   ProjectileSpeed: 20
+  StrongAttackDeliveryType: 0
+  StrongAttackProjectileCount: 3
+  StrongAttackProjectileSpreadAngle: 12
+  StrongAttackProjectileSpeedMultiplier: 1.1
+  AggressionAnimationDuration: 1.2
+  AttackAnimationDuration: 1
+  StrongAttackAnimationDuration: 1.4
+  EnrageAnimationDuration: 1.4

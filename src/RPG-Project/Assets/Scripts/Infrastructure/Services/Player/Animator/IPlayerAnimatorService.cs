@@ -7,6 +7,7 @@ namespace Infrastructure.Services.Player.Animator
     public interface IPlayerAnimatorService
     {
         public bool IsInitilized { get; set; }
+        public bool IsHitStateActive { get; }
         public void InstallService();
         public void UninstallService();
         public void SetFightInputService(IFightInputService fightInputService);

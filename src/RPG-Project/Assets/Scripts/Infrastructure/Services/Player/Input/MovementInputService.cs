@@ -13,6 +13,8 @@ namespace Infrastructure.Services.Player.Input
         public Vector2 MoveVector { get; set; }
         
         private bool _isMoveAfterActionContinue = false;
+        private bool _isSprintRequested = false;
+        private bool _isSprintActive = false;
         private Vector2 _continueMoveVector;
         
         private readonly InputManager _inputManager;
@@ -32,6 +34,11 @@ namespace Infrastructure.Services.Player.Input
         public void InstallService()
         {
             CanMove = true;
+            IsMoving = false;
+            MoveVector = Vector2.zero;
+            _continueMoveVector = Vector2.zero;
+            _isSprintRequested = false;
+            _isSprintActive = false;
 
             _playerMovement = _playerService.PlayerObject.GetComponent<PlayerMovement>();
             
@@ -57,6 +64,7 @@ namespace Infrastructure.Services.Player.Input
             IsMoving = true;
             MoveVector = _continueMoveVector;
             _playerMovement.OnMovementChange();
+            ApplySprintState();
         }
 
         private void OnJump()
@@ -79,11 +87,29 @@ namespace Infrastructure.Services.Player.Input
             if (IsMoving) MoveVector = _continueMoveVector;
             else MoveVector = Vector2.zero;
             _playerMovement.OnMovementChange();
+            ApplySprintState();
         }
 
         private void OnSprint(InputAction.CallbackContext context)
         {
-            _playerMovement.SprintChange(!context.canceled);
+            _isSprintRequested = !context.canceled;
+            ApplySprintState();
+        }
+
+        private void ApplySprintState()
+        {
+            bool shouldSprint = _isSprintRequested
+                && CanMove
+                && IsMoving
+                && MoveVector.y >= 0f;
+
+            if (_isSprintActive == shouldSprint)
+            {
+                return;
+            }
+
+            _isSprintActive = shouldSprint;
+            _playerMovement.SprintChange(_isSprintActive);
         }
     }
 }

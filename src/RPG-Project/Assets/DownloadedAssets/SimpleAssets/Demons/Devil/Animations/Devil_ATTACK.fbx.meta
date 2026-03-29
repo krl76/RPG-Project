@@ -63,8 +63,15 @@ ModelImporter:
       curves: []
       events:
       - time: 0.45576406
-        functionName: OnPhysicalAttack
-        data: 
+        functionName: OnAnimationEvent
+        data: AttackImpact
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.7934272
+        functionName: OnAnimationEvent
+        data: ActionCompleted
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
