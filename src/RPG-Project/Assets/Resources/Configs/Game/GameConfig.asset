@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55a89423c5814e5785ad1a7b96fd0f5c, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: Assembly-CSharp::Data.Configs.GameConfig
-  PeacefulModeEnabled: 1
+  PeacefulModeEnabled: 0

@@ -16,7 +16,7 @@ MonoBehaviour:
   Type: 0
   BehaviourType: 1
   MaxHealth: 500
-  Damage: 20
+  Damage: 15
   FleeHealthThreshold: 0.2
   EnrageHealthThreshold: 0.35
   ChaseRange: 10

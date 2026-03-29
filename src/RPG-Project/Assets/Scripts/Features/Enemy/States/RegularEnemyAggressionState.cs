@@ -29,13 +29,14 @@ namespace Features.Enemy.States
 
             if (Enemy.IsPlayerInAttackRange())
             {
-                Enemy.StopMovement();
-                Enemy.LookAtTarget();
-
                 if (Enemy.CanStartPrimaryAttack())
                 {
                     StateMachine.Enter(EnemyStateId.Attack);
+                    return;
                 }
+
+                Enemy.StopMovement();
+                Enemy.LookAtTarget();
 
                 return;
             }

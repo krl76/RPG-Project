@@ -10,7 +10,6 @@ namespace Features.Enemy.States
 
         public override void Enter()
         {
-            Enemy.StopMovement();
             Enemy.StartEnrageAction();
         }
 

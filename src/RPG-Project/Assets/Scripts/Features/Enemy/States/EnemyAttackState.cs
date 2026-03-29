@@ -20,8 +20,6 @@ namespace Features.Enemy.States
 
         public override void Enter()
         {
-            Enemy.StopMovement();
-
             if (_actionType == EnemyActionType.StrongAttack)
             {
                 if (Enemy.CanStartStrongAttack() == false)

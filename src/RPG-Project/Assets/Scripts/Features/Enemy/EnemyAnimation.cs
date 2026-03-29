@@ -351,5 +351,6 @@ namespace Features.Enemy
                 _animator.ResetTrigger(hash);
             }
         }
+
     }
 }

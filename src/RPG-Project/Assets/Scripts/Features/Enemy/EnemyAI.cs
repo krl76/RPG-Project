@@ -377,6 +377,7 @@ namespace Features.Enemy
         public void StartAggressionAction()
         {
             StartAction(EnemyActionType.Aggression, Config.AggressionAnimationDuration);
+            StopMovement();
             _enemyAnimation.PlayAggression();
         }
 
@@ -384,6 +385,7 @@ namespace Features.Enemy
         {
             _nextPrimaryAttackTime = Time.time + Config.AttackCooldown;
             StartAction(EnemyActionType.Attack, Config.AttackAnimationDuration);
+            StopMovement();
             _enemyAnimation.PlayAttack(IsUsingRangedAttack());
         }
 
@@ -391,6 +393,7 @@ namespace Features.Enemy
         {
             _nextStrongAttackTime = Time.time + Config.StrongAttackCooldown;
             StartAction(EnemyActionType.StrongAttack, Config.StrongAttackAnimationDuration);
+            StopMovement();
             _enemyAnimation.PlayStrongAttack();
         }
 
@@ -398,6 +401,7 @@ namespace Features.Enemy
         {
             _nextAirAttackTime = Time.time + Config.AirAttackCooldown;
             StartAction(EnemyActionType.AirAttack, Config.AirAttackAnimationDuration);
+            StopMovement();
             _enemyAnimation.PlayAirAttack();
         }
 
@@ -405,6 +409,7 @@ namespace Features.Enemy
         {
             _isEnraged = true;
             StartAction(EnemyActionType.Enrage, Config.EnrageAnimationDuration);
+            StopMovement();
             _enemyAnimation.PlayEnrage();
         }
 
@@ -415,7 +420,7 @@ namespace Features.Enemy
 
         public bool IsBossActionAnimationStillPlaying()
         {
-            return IsBossActionAnimationLocked();
+            return IsCurrentActionAnimationLocked();
         }
 
         public void TakeDamage(float amount)
@@ -609,7 +614,7 @@ namespace Features.Enemy
                 return;
             }
 
-            if (IsBossActionAnimationLocked())
+            if (IsCurrentActionAnimationLocked())
             {
                 return;
             }
@@ -837,6 +842,25 @@ namespace Features.Enemy
                 EnemyActionType.Enrage => _enemyAnimation.IsAnyCurrentStateOrTransitioningTo("Defend"),
                 _ => false
             };
+        }
+
+        private bool IsCurrentActionAnimationLocked()
+        {
+            if (_enemyAnimation == null)
+            {
+                return false;
+            }
+
+            if (_currentAction == EnemyActionType.Attack)
+            {
+                return _enemyAnimation.IsAnyCurrentStateOrTransitioningTo(
+                    "Attack",
+                    "MagicAttack",
+                    "Basic Attack",
+                    "Claw Attack");
+            }
+
+            return IsBossActionAnimationLocked();
         }
 
         private float GetIncomingDamageMultiplier()

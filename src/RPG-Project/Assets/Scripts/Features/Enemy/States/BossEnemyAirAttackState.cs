@@ -10,8 +10,6 @@ namespace Features.Enemy.States
 
         public override void Enter()
         {
-            Enemy.StopMovement();
-
             if (Enemy.CanStartAirAttack() == false)
             {
                 StateMachine.Enter(EnemyStateId.Chase);

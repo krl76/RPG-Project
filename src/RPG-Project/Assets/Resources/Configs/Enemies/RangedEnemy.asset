@@ -36,13 +36,28 @@ MonoBehaviour:
   StrongAttackHitRadiusMultiplier: 1.5
   EnragedDamageMultiplier: 1.25
   RecoverDuration: 1
+  DefendDamageTakenMultiplier: 0.5
   ProjectilePrefab: {fileID: 3006659048013178604, guid: 8ce934b3bc583b449af649a274207705, type: 3}
   ProjectileSpeed: 20
+  SustainedAttackEffectPrefab: {fileID: 0}
+  SustainedAttackProjectilePrefab: {fileID: 0}
+  SustainedAttackProjectileRotationOffset: {x: 0, y: 0, z: 0}
+  SustainedAttackProjectileLifetime: 0.75
   StrongAttackDeliveryType: 0
   StrongAttackProjectileCount: 3
   StrongAttackProjectileSpreadAngle: 12
   StrongAttackProjectileSpeedMultiplier: 1.1
+  StrongAttackEffectRadius: 2.5
+  StrongAttackDamageTickInterval: 0.2
+  AirAttackRange: 14
+  AirAttackCooldown: 8
+  AirAttackDamageMultiplier: 1.5
+  AirAttackEffectRadius: 3
+  AirAttackDamageTickInterval: 0.2
   AggressionAnimationDuration: 1.2
+  AggressionPostActionDelay: 0.35
   AttackAnimationDuration: 1
   StrongAttackAnimationDuration: 1.4
   EnrageAnimationDuration: 1.4
+  EnragePostActionDelay: 0.25
+  AirAttackAnimationDuration: 4
