@@ -129,7 +129,7 @@ namespace Infrastructure.Services.Player.Input
 
         private bool AttackStart()
         {
-            if (_isAttackStarted || _movement.IsFalling) return false;
+            if (_isAttackStarted || _movement.IsFalling || _animatorService.IsHitStateActive) return false;
             
             _isAttackStarted = true;
             _movementInputService.MoveVector = Vector2.zero;

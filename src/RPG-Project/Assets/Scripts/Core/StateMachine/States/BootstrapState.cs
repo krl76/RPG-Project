@@ -4,6 +4,7 @@ using Infrastructure.Providers.Configs;
 using Infrastructure.Services.Audio;
 using Infrastructure.Services.Player.Input;
 using Input.PlayerInput;
+using UnityEngine;
 
 namespace Core.StateMachine.States
 {

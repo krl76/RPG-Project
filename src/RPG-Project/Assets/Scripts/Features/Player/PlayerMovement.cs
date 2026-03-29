@@ -57,6 +57,8 @@ namespace Features.Player
         private float _animationSmoothTime = 0.2f;
         private Vector2 _currentAnimVector;
         private Vector2 _animVelocity;
+        private Coroutine _speedChangeCoroutine;
+        private bool _isBaseMoveSpeedApplied;
         
         private IMovementInputService _movementInput;
         private IPlayerService _playerService;
@@ -82,6 +84,21 @@ namespace Features.Player
         private void Start() // delete when proper bootstrap setup
         {
             _config = _configDataProvider?.GetPlayerStatsConfig();
+            if (_config == null)
+            {
+                return;
+            }
+
+            _currentMoveSpeed = _config.WalkSpeed;
+            _changedMoveSpeed = _config.WalkSpeed;
+            _sprintSpeedCoefficent = 1f;
+            _isBaseMoveSpeedApplied = false;
+
+            if (_animator.IsInitilized)
+            {
+                _animator.ChangeMoveSpeed(_currentMoveSpeed);
+                _isBaseMoveSpeedApplied = true;
+            }
         }
 
         public void OnJumpPressed()
@@ -119,9 +136,21 @@ namespace Features.Player
 
         public void SprintChange(bool isAcceleration)
         {
-            if (isAcceleration) _changedMoveSpeed = _config.RunSpeed;
-            else _changedMoveSpeed = _config.WalkSpeed;
-            StartCoroutine(ChangeSpeed());
+            float targetSpeed = isAcceleration ? _config.RunSpeed : _config.WalkSpeed;
+            if (Mathf.Approximately(_changedMoveSpeed, targetSpeed) &&
+                Mathf.Abs(_currentMoveSpeed - targetSpeed) <= 0.05f)
+            {
+                return;
+            }
+
+            _changedMoveSpeed = targetSpeed;
+
+            if (_speedChangeCoroutine != null)
+            {
+                StopCoroutine(_speedChangeCoroutine);
+            }
+
+            _speedChangeCoroutine = StartCoroutine(ChangeSpeed());
         }
         
         private void OnEnable()
@@ -140,6 +169,12 @@ namespace Features.Player
         private void Update()
         {
             if (_animator.IsInitilized == false ) return;
+
+            if (_isBaseMoveSpeedApplied == false && _config != null)
+            {
+                _animator.ChangeMoveSpeed(_currentMoveSpeed);
+                _isBaseMoveSpeedApplied = true;
+            }
             
             UpdateTimers();
             
@@ -154,12 +189,19 @@ namespace Features.Player
             {
                 inputMove = inputMove.normalized;
             }
-
+            
             float safeCurrentSpeed = Mathf.Clamp(_currentMoveSpeed, _config.WalkSpeed, _config.RunSpeed);
-
             float sprintProgress = Mathf.InverseLerp(_config.WalkSpeed, _config.RunSpeed, safeCurrentSpeed);
-
             float blendTreeMultiplier = Mathf.Lerp(0.5f, 1f, sprintProgress);
+
+            if (inputMove.sqrMagnitude > 0.81f)
+            {
+                float dominantAxis = Mathf.Max(Mathf.Abs(inputMove.x), Mathf.Abs(inputMove.y));
+                if (dominantAxis > 0.01f)
+                {
+                    inputMove /= dominantAxis;
+                }
+            }
 
             Vector2 targetMove = inputMove * blendTreeMultiplier;
 
@@ -244,6 +286,7 @@ namespace Features.Player
             _currentMoveSpeed = _changedMoveSpeed;
             _sprintSpeedCoefficent = _currentMoveSpeed / _config.WalkSpeed;
             _animator.ChangeMoveSpeed(_currentMoveSpeed);
+            _speedChangeCoroutine = null;
         }
 
         private void Hit()

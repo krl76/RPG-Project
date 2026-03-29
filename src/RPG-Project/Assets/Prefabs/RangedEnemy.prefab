@@ -10818,6 +10818,7 @@ GameObject:
   - component: {fileID: 4540376322474344734}
   - component: {fileID: 3500157399042931527}
   - component: {fileID: 3531379625926015296}
+  - component: {fileID: 4425129589856778623}
   m_Layer: 10
   m_Name: RangedEnemy
   m_TagString: Untagged
@@ -10902,7 +10903,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3661fcf5ef64adab678c2e47f01eac2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Features.Enemy.EnemyAI
-  Config: {fileID: 11400000, guid: ef13a6b6bf257d842b7a82e2baba1665, type: 2}
+  <Config>k__BackingField: {fileID: 11400000, guid: ef13a6b6bf257d842b7a82e2baba1665, type: 2}
   _meleeAttackPoint: {fileID: 0}
   _shootPoint: {fileID: 2153644462551962868}
   _playerLayer:
@@ -10943,6 +10944,18 @@ CapsuleCollider:
   m_Height: 1.4912573
   m_Direction: 1
   m_Center: {x: 0, y: 0.75, z: 0}
+--- !u!114 &4425129589856778623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7949785803542993917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27af28ba36ab43ce862a69f245c5e706, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Features.Enemy.EnemyEventReader
 --- !u!1 &8018318172912425215
 GameObject:
   m_ObjectHideFlags: 0

@@ -36,6 +36,11 @@ namespace Infrastructure.Services.Player.Animator
         private readonly int _moveY = UnityEngine.Animator.StringToHash("moveY");
         
         private readonly int _turn = UnityEngine.Animator.StringToHash("Turn");
+
+        private readonly int _attackSwordState = UnityEngine.Animator.StringToHash("AttackSword");
+        private readonly int _attackMagicState = UnityEngine.Animator.StringToHash("AttackMagic");
+        private readonly int _hitState = UnityEngine.Animator.StringToHash("Hit");
+        private readonly int _deathState = UnityEngine.Animator.StringToHash("Death");
         
         #endregion
         
@@ -61,6 +66,7 @@ namespace Infrastructure.Services.Player.Animator
         }
 
         public bool IsInitilized { get; set; } = false;
+        public bool IsHitStateActive => IsCurrentStateOrTransitioningTo(_hitState);
         
 
         public void InstallService()
@@ -83,6 +89,7 @@ namespace Infrastructure.Services.Player.Animator
         {
             _animator.ResetTrigger(_physicalAttack);
             _animator.ResetTrigger(_magicAttack);
+            _animator.ResetTrigger(_getHit);
             _fightInputService.AttackEnd();
         }
 
@@ -114,11 +121,29 @@ namespace Infrastructure.Services.Player.Animator
 
         public void TriggerLand() =>  _animator.SetTrigger(_land);
 
-        public void TriggerPhysicalAttack() => _animator.SetTrigger(_physicalAttack);
-        public void TriggerMagicAttack() => _animator.SetTrigger(_magicAttack);
+        public void TriggerPhysicalAttack()
+        {
+            _animator.ResetTrigger(_getHit);
+            _animator.SetTrigger(_physicalAttack);
+        }
+
+        public void TriggerMagicAttack()
+        {
+            _animator.ResetTrigger(_getHit);
+            _animator.SetTrigger(_magicAttack);
+        }
         public void TriggerGrabGun() => _animator.SetTrigger(_grabGun);
 
-        public void TriggerHit() => _animator.SetTrigger(_getHit);
+        public void TriggerHit()
+        {
+            _animator.ResetTrigger(_getHit);
+            if (CanPlayHitNow() == false)
+            {
+                return;
+            }
+
+            _animator.SetTrigger(_getHit);
+        }
 
         public void TriggerDeath()
         {
@@ -158,18 +183,61 @@ namespace Infrastructure.Services.Player.Animator
                     OnGrabGun?.Invoke();
                     break;
                 case "GrabGunEnded":
+                    _animator.ResetTrigger(_getHit);
                     OnGrabGunEnded?.Invoke();
                     break;
                 case "AttackEnded":
+                    _animator.ResetTrigger(_getHit);
                     OnAttackEnded?.Invoke();
                     break;
                 case "ShootEnded":
+                    _animator.ResetTrigger(_getHit);
                     OnShootEnded?.Invoke();
                     break;
                 case "PhysicalAttack":
                     OnPhysicalAttack?.Invoke();
                     break;
             }
+        }
+
+        private bool CanPlayHitNow()
+        {
+            AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
+            if (IsBlockedHitState(currentState.shortNameHash))
+            {
+                return false;
+            }
+
+            if (_animator.IsInTransition(0))
+            {
+                AnimatorStateInfo nextState = _animator.GetNextAnimatorStateInfo(0);
+                if (IsBlockedHitState(nextState.shortNameHash))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool IsBlockedHitState(int stateHash)
+        {
+            return stateHash == _attackSwordState
+                || stateHash == _attackMagicState
+                || stateHash == _hitState
+                || stateHash == _deathState;
+        }
+
+        private bool IsCurrentStateOrTransitioningTo(int stateHash)
+        {
+            AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
+            if (currentState.shortNameHash == stateHash)
+            {
+                return true;
+            }
+
+            return _animator.IsInTransition(0)
+                && _animator.GetNextAnimatorStateInfo(0).shortNameHash == stateHash;
         }
     }
 }

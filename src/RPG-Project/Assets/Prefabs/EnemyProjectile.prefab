@@ -154,4 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Features.Combat.MagicProjectile
   _lifetime: 3
+  _targetLayer:
+    serializedVersion: 2
+    m_Bits: 128
   _rigidbody: {fileID: 5481031569366015508}

@@ -63,8 +63,15 @@ ModelImporter:
       curves: []
       events:
       - time: 0.60687023
-        functionName: OnMagicAttack
-        data: 
+        functionName: OnAnimationEvent
+        data: AttackImpact
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.8873239
+        functionName: OnAnimationEvent
+        data: ActionCompleted
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
