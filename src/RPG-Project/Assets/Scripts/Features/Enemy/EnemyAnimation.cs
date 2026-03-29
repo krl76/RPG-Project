@@ -193,9 +193,11 @@ namespace Features.Enemy
                     OnAirAttackImpact?.Invoke();
                     break;
                 case "AttackEffectCompleted":
+                case "AttaclEffectCompleted":
                 case "StrongAttackCompleted":
                 case "AirAttackCompleted":
                 case "OnAttackEffectCompleted":
+                case "OnAttaclEffectCompleted":
                 case "OnStrongAttackCompleted":
                 case "OnAirAttackCompleted":
                     OnAttackEffectCompleted?.Invoke();
@@ -215,7 +217,17 @@ namespace Features.Enemy
         {
             EnsureInitialized();
 
+            if (UsesAnimatorDrivenLocomotion())
+            {
+                return;
+            }
+
             AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
+            if (ShouldDelayLocomotionSync(currentState))
+            {
+                return;
+            }
+
             int[] shortStateHashes = isMoving ? _runShortStateHashes : _idleShortStateHashes;
             for (int i = 0; i < shortStateHashes.Length; i++)
             {
@@ -228,6 +240,11 @@ namespace Features.Enemy
             if (_animator.IsInTransition(0))
             {
                 AnimatorStateInfo nextState = _animator.GetNextAnimatorStateInfo(0);
+                if (ShouldDelayLocomotionSync(nextState))
+                {
+                    return;
+                }
+
                 for (int i = 0; i < shortStateHashes.Length; i++)
                 {
                     if (nextState.shortNameHash == shortStateHashes[i])
@@ -249,6 +266,43 @@ namespace Features.Enemy
                 _animator.CrossFade(stateHash, 0.12f, 0);
                 return;
             }
+        }
+
+        private bool UsesAnimatorDrivenLocomotion()
+        {
+            return _availableParameters.Contains(RunHash)
+                || _availableParameters.Contains(WalkHash);
+        }
+
+        private bool ShouldDelayLocomotionSync(AnimatorStateInfo stateInfo)
+        {
+            if (IsLocomotionState(stateInfo.shortNameHash))
+            {
+                return false;
+            }
+
+            return stateInfo.loop == false && stateInfo.normalizedTime < 0.98f;
+        }
+
+        private bool IsLocomotionState(int shortStateHash)
+        {
+            for (int i = 0; i < _idleShortStateHashes.Length; i++)
+            {
+                if (_idleShortStateHashes[i] == shortStateHash)
+                {
+                    return true;
+                }
+            }
+
+            for (int i = 0; i < _runShortStateHashes.Length; i++)
+            {
+                if (_runShortStateHashes[i] == shortStateHash)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool IsCurrentStateOrTransitioningTo(string shortStateName)

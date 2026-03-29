@@ -54,6 +54,11 @@ MonoBehaviour:
   AirAttackDamageMultiplier: 1.5
   AirAttackEffectRadius: 3
   AirAttackDamageTickInterval: 0.2
+  MeleeWeaponEffectPrefabs: []
+  RangedProjectilePrefabs:
+  - {fileID: 6640704762432164853, guid: 01e1a6e069548514c9a218436401342c, type: 3}
+  - {fileID: 6640704762432164853, guid: 77aaf7023a6d6e54f994a1a30b13ff8b, type: 3}
+  BossElementVariations: []
   AggressionAnimationDuration: 1.2
   AggressionPostActionDelay: 0.35
   AttackAnimationDuration: 1

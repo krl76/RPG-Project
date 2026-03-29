@@ -27,7 +27,7 @@ MonoBehaviour:
   ChaseSpeedMultiplier: 1
   FleeSpeedMultiplier: 1.2
   EnragedSpeedMultiplier: 1.15
-  AttackRange: 6
+  AttackRange: 4.4
   StrongAttackRange: 8
   AttackCooldown: 3
   StrongAttackCooldown: 10
@@ -54,10 +54,33 @@ MonoBehaviour:
   AirAttackDamageMultiplier: 1
   AirAttackEffectRadius: 3.5
   AirAttackDamageTickInterval: 0.2
+  MeleeWeaponEffectPrefabs: []
+  RangedProjectilePrefabs: []
+  BossElementVariations:
+  - Id: 0
+    MeleeWeaponEffectPrefab: {fileID: 0}
+    SustainedAttackEffectPrefab: {fileID: 1725317912486240, guid: ae089c2fab473984888bd68dd226f822, type: 3}
+    SustainedAttackProjectilePrefab: {fileID: 1725317912486240, guid: ae089c2fab473984888bd68dd226f822, type: 3}
+    SustainedAttackProjectileRotationOffset: {x: -90, y: 0, z: 0}
+  - Id: 1
+    MeleeWeaponEffectPrefab: {fileID: 0}
+    SustainedAttackEffectPrefab: {fileID: 1518366863219760, guid: e09b4db8c34968c47ae0efec7377431b, type: 3}
+    SustainedAttackProjectilePrefab: {fileID: 1518366863219760, guid: e09b4db8c34968c47ae0efec7377431b, type: 3}
+    SustainedAttackProjectileRotationOffset: {x: -90, y: 0, z: 0}
+  - Id: 2
+    MeleeWeaponEffectPrefab: {fileID: 0}
+    SustainedAttackEffectPrefab: {fileID: 1900756431413560, guid: 5de8ea22512863b4eb664773b279ec77, type: 3}
+    SustainedAttackProjectilePrefab: {fileID: 1900756431413560, guid: 5de8ea22512863b4eb664773b279ec77, type: 3}
+    SustainedAttackProjectileRotationOffset: {x: -90, y: 0, z: 0}
+  - Id: 3
+    MeleeWeaponEffectPrefab: {fileID: 0}
+    SustainedAttackEffectPrefab: {fileID: 1975959190090480, guid: 6ddaeadfa62dca24f99dcae876993b52, type: 3}
+    SustainedAttackProjectilePrefab: {fileID: 1975959190090480, guid: 6ddaeadfa62dca24f99dcae876993b52, type: 3}
+    SustainedAttackProjectileRotationOffset: {x: -90, y: 0, z: 0}
   AggressionAnimationDuration: 1.2
-  AggressionPostActionDelay: 2
+  AggressionPostActionDelay: 0.5
   AttackAnimationDuration: 1
   StrongAttackAnimationDuration: 2.2
   EnrageAnimationDuration: 1.4
-  EnragePostActionDelay: 2
+  EnragePostActionDelay: 0.5
   AirAttackAnimationDuration: 8

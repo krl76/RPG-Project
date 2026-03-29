@@ -26,6 +26,16 @@ namespace Data.Configs
         SustainedEffect
     }
 
+    [System.Serializable]
+    public sealed class BossElementVariation
+    {
+        public string Id;
+        public GameObject MeleeWeaponEffectPrefab;
+        public GameObject SustainedAttackEffectPrefab;
+        public GameObject SustainedAttackProjectilePrefab;
+        public Vector3 SustainedAttackProjectileRotationOffset;
+    }
+
     [CreateAssetMenu(fileName = "NewEnemyConfig", menuName = "Configs/Enemy Config")]
     public class EnemyConfig : ScriptableObject
     {
@@ -82,6 +92,13 @@ namespace Data.Configs
         [Min(1f)] public float AirAttackDamageMultiplier = 1.5f;
         [Min(0f)] public float AirAttackEffectRadius = 3f;
         [Min(0.05f)] public float AirAttackDamageTickInterval = 0.2f;
+
+        [Header("Visual Variations - Regular")]
+        public List<GameObject> MeleeWeaponEffectPrefabs = new();
+        public List<GameObject> RangedProjectilePrefabs = new();
+
+        [Header("Visual Variations - Boss")]
+        public List<BossElementVariation> BossElementVariations = new();
 
         [Header("Animation Fallback Durations")]
         [Min(0.1f)] public float AggressionAnimationDuration = 1.2f;

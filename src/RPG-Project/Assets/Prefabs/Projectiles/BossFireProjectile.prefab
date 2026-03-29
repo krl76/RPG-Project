@@ -19405,8 +19405,9 @@ GameObject:
   - component: {fileID: 199176809758892682}
   - component: {fileID: -3301237547331984821}
   - component: {fileID: -5977451807165448455}
+  - component: {fileID: 2111366794754319734}
   m_Layer: 10
-  m_Name: BossAttackProjectile
+  m_Name: BossFireProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24291,6 +24292,27 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   _rigidbody: {fileID: -3301237547331984821}
+--- !u!135 &2111366794754319734
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1725317912486240}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8998195226543954438
 GameObject:
   m_ObjectHideFlags: 0

@@ -29,7 +29,7 @@ MonoBehaviour:
   EnragedSpeedMultiplier: 1.15
   AttackRange: 2.3
   StrongAttackRange: 6
-  AttackCooldown: 4
+  AttackCooldown: 3
   StrongAttackCooldown: 5
   HitRadius: 0.5
   StrongAttackDamageMultiplier: 1.8
@@ -54,6 +54,11 @@ MonoBehaviour:
   AirAttackDamageMultiplier: 1.5
   AirAttackEffectRadius: 3
   AirAttackDamageTickInterval: 0.2
+  MeleeWeaponEffectPrefabs:
+  - {fileID: 1537593200154216, guid: 45f087c215510da4dba5f27de73c397b, type: 3}
+  - {fileID: 5244990466572478861, guid: a701d73488eaeff45bddb860da6e3236, type: 3}
+  RangedProjectilePrefabs: []
+  BossElementVariations: []
   AggressionAnimationDuration: 1.2
   AggressionPostActionDelay: 0.35
   AttackAnimationDuration: 1
