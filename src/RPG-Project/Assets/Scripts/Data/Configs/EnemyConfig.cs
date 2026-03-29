@@ -29,11 +29,34 @@ namespace Data.Configs
     [System.Serializable]
     public sealed class BossElementVariation
     {
-        public string Id;
         public GameObject MeleeWeaponEffectPrefab;
         public GameObject SustainedAttackEffectPrefab;
         public GameObject SustainedAttackProjectilePrefab;
         public Vector3 SustainedAttackProjectileRotationOffset;
+    }
+
+    [System.Serializable]
+    public struct EnemyAudioCue
+    {
+        [Range(0f, 1f)] public float Volume;
+        public AudioClip[] Clips;
+
+        public bool TryGetClip(int variationIndex, out AudioClip clip)
+        {
+            clip = null;
+
+            if (Clips == null || Clips.Length == 0)
+            {
+                return false;
+            }
+
+            int clipIndex = Clips.Length == 1
+                ? 0
+                : Mathf.Clamp(variationIndex, 0, Clips.Length - 1);
+
+            clip = Clips[clipIndex];
+            return clip != null;
+        }
     }
 
     [CreateAssetMenu(fileName = "NewEnemyConfig", menuName = "Configs/Enemy Config")]
@@ -43,6 +66,7 @@ namespace Data.Configs
         public int Id;
         public EnemyType Type;
         public EnemyBehaviourType BehaviourType = EnemyBehaviourType.Regular;
+        public GameObject EnemyPrefab;
 
         [Header("Stats")]
         [Min(1)] public float MaxHealth = 100f;
@@ -73,11 +97,7 @@ namespace Data.Configs
         [Range(0f, 1f)] public float DefendDamageTakenMultiplier = 0.5f;
 
         [Header("Ranged specific")]
-        public GameObject ProjectilePrefab;
         public float ProjectileSpeed = 20f;
-        public GameObject SustainedAttackEffectPrefab;
-        public GameObject SustainedAttackProjectilePrefab;
-        public Vector3 SustainedAttackProjectileRotationOffset;
         [Min(0.05f)] public float SustainedAttackProjectileLifetime = 0.75f;
         public EnemyAttackDeliveryType StrongAttackDeliveryType = EnemyAttackDeliveryType.Auto;
         [Min(1)] public int StrongAttackProjectileCount = 3;
@@ -95,10 +115,17 @@ namespace Data.Configs
 
         [Header("Visual Variations - Regular")]
         public List<GameObject> MeleeWeaponEffectPrefabs = new();
-        public List<GameObject> RangedProjectilePrefabs = new();
+        public List<GameObject> RangedProjectileVisualPrefabs = new();
 
         [Header("Visual Variations - Boss")]
         public List<BossElementVariation> BossElementVariations = new();
+
+        [Header("Audio")]
+        public EnemyAudioCue MeleeAttackSound;
+        public EnemyAudioCue MagicAttackSound;
+        public EnemyAudioCue HitSound;
+        public EnemyAudioCue AggressionSound;
+        public EnemyAudioCue AirAttackLoopSound;
 
         [Header("Animation Fallback Durations")]
         [Min(0.1f)] public float AggressionAnimationDuration = 1.2f;

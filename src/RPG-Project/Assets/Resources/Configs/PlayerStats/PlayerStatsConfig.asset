@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Data.Configs.PlayerStatsConfig
   InitialHealth: 100
   PhysicalDamage: 50
-  MagicDamage: 40
+  MagicDamage: 100
   MeleeHitRadius: 0.6
   MagicAttackCooldown: 10
-  ProjectileSpeed: 25
+  ProjectileSpeed: 18
   MoveSpeedCoef: 3.5
   WalkSpeed: 3
   RunSpeed: 6

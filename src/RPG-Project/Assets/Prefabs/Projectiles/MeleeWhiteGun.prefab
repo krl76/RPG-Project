@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4076352438612880}
   - component: {fileID: 198318467894892708}
   - component: {fileID: 199780960967591868}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Sparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4859,7 +4859,7 @@ GameObject:
   - component: {fileID: 4912271624496758}
   - component: {fileID: 198544066697443130}
   - component: {fileID: 199603002662823144}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Fire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9707,7 +9707,7 @@ GameObject:
   - component: {fileID: 4832750714773668}
   - component: {fileID: 198446971744627332}
   - component: {fileID: 199524112731312442}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MeleeWhiteGun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14558,7 +14558,7 @@ GameObject:
   - component: {fileID: 4566808143426998}
   - component: {fileID: 198542584851361198}
   - component: {fileID: 199792476553075822}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Smoke
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4985046559456276}
   - component: {fileID: 198889961251652488}
   - component: {fileID: 199995096730788386}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Sparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4859,7 +4859,7 @@ GameObject:
   - component: {fileID: 4624319605544806}
   - component: {fileID: 198592367852795574}
   - component: {fileID: 199094650195955898}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Smoke
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9707,7 +9707,7 @@ GameObject:
   - component: {fileID: 4535912075057512}
   - component: {fileID: 198114777272790932}
   - component: {fileID: 199899781212541530}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: FireDark
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14558,7 +14558,7 @@ GameObject:
   - component: {fileID: 417305596798123416}
   - component: {fileID: -1172385746715481039}
   - component: {fileID: 8528464576645350565}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: BossGreenFireProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19442,6 +19442,9 @@ MonoBehaviour:
   _targetLayer:
     serializedVersion: 2
     m_Bits: 128
+  _selfLayer:
+    serializedVersion: 2
+    m_Bits: 1024
   _rigidbody: {fileID: 417305596798123416}
 --- !u!135 &8528464576645350565
 SphereCollider:
@@ -19475,7 +19478,7 @@ GameObject:
   - component: {fileID: 4119553214049766}
   - component: {fileID: 198025281900492468}
   - component: {fileID: 199173946832283486}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Fire
   m_TagString: Untagged
   m_Icon: {fileID: 0}

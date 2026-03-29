@@ -9182,7 +9182,7 @@ RectTransform:
   m_GameObject: {fileID: 6231364568921444804}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.005, y: 0.005, z: 0.005}
+  m_LocalScale: {x: -0.005, y: -0.005, z: -0.005}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1911642466553439130}
@@ -9269,6 +9269,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.WorldHealthBar
   _healthSlider: {fileID: 8195879240288885530}
+  _minPunchScale: 0.9
 --- !u!1 &6257611437886502868
 GameObject:
   m_ObjectHideFlags: 0
@@ -9443,7 +9444,6 @@ GameObject:
   - component: {fileID: 8921092405571509531}
   - component: {fileID: 1211764508948370612}
   - component: {fileID: 6242506742992666171}
-  - component: {fileID: 1641742388593668827}
   m_Layer: 10
   m_Name: MeleeEnemy
   m_TagString: Untagged
@@ -9580,18 +9580,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27af28ba36ab43ce862a69f245c5e706, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Features.Enemy.EnemyEventReader
---- !u!114 &1641742388593668827
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6375017518884761477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fde293b75bfe4b8091bc1bec686fcfbc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Features.Enemy.EnemyAnimation
 --- !u!1 &6377979578109990626
 GameObject:
   m_ObjectHideFlags: 0

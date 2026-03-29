@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4746162465361499796}
   - component: {fileID: 5481031569366015508}
   - component: {fileID: -6479543886755882140}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ShootProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -140,7 +140,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &-6479543886755882140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,8 +153,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56d46eb7ad904c7f82e49f9e62689d1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Features.Combat.MagicProjectile
-  _lifetime: 3
+  _lifetime: 2
   _targetLayer:
     serializedVersion: 2
     m_Bits: 1024
+  _selfLayer:
+    serializedVersion: 2
+    m_Bits: 128
   _rigidbody: {fileID: 5481031569366015508}
+  _collisionTrigger: {fileID: 0}

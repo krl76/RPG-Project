@@ -65,7 +65,7 @@ namespace Infrastructure.Services.Player.Input
             _inputManager.Actions.MagicAttack += OnGrabGun;
             _inputManager.Actions.SwordAttack += OnMagicAttack; 
 
-            _animatorService.OnGrabGunEnded += AttackEnd;
+            _animatorService.OnShootEnded += AttackEnd;
             _animatorService.OnAttackEnded += AttackEnd;
         }
 
@@ -75,7 +75,7 @@ namespace Infrastructure.Services.Player.Input
             _inputManager.Actions.MagicAttack -= OnGrabGun;
             _inputManager.Actions.SwordAttack -= OnMagicAttack;
             
-            _animatorService.OnGrabGunEnded -= AttackEnd;
+            _animatorService.OnShootEnded -= AttackEnd;
             _animatorService.OnAttackEnded -= AttackEnd;
             
             _cancellationTokenSource?.Cancel();

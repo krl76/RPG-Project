@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4568631067260582}
   - component: {fileID: 198035010440344822}
   - component: {fileID: 199182815386120642}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Smoke
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4859,7 +4859,7 @@ GameObject:
   - component: {fileID: 4261880491290870}
   - component: {fileID: 198960286276550306}
   - component: {fileID: 199787128657418344}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: FireDark
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9707,7 +9707,7 @@ GameObject:
   - component: {fileID: 4999175273111558}
   - component: {fileID: 198770916305096390}
   - component: {fileID: 199442199452388446}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Fire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14555,7 +14555,7 @@ GameObject:
   - component: {fileID: 4994149801054408}
   - component: {fileID: 198788489815347688}
   - component: {fileID: 199495056919051392}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Sparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19406,7 +19406,7 @@ GameObject:
   - component: {fileID: -5181579941702212569}
   - component: {fileID: -6027013747600033595}
   - component: {fileID: 2684919017256613198}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: BossRedFireProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24290,6 +24290,9 @@ MonoBehaviour:
   _targetLayer:
     serializedVersion: 2
     m_Bits: 128
+  _selfLayer:
+    serializedVersion: 2
+    m_Bits: 1024
   _rigidbody: {fileID: -5181579941702212569}
 --- !u!135 &2684919017256613198
 SphereCollider:

@@ -17,10 +17,5 @@ namespace Data.Configs
         public AudioCue PlayerMeleeAttack;
         public AudioCue PlayerShot;
         public AudioCue PlayerHit;
-
-        [Header("Enemy")]
-        public AudioCue EnemyMeleeAttack;
-        public AudioCue EnemyMagicAttack;
-        public AudioCue EnemyHit;
     }
 }

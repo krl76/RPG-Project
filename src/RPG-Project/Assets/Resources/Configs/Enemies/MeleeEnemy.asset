@@ -15,6 +15,7 @@ MonoBehaviour:
   Id: 1
   Type: 0
   BehaviourType: 0
+  EnemyPrefab: {fileID: 6375017518884761477, guid: f04cfbf37666f9e40b0e552f9105e134, type: 3}
   MaxHealth: 100
   Damage: 15
   FleeHealthThreshold: 0.4
@@ -37,11 +38,7 @@ MonoBehaviour:
   EnragedDamageMultiplier: 1.25
   RecoverDuration: 1
   DefendDamageTakenMultiplier: 0.5
-  ProjectilePrefab: {fileID: 0}
   ProjectileSpeed: 20
-  SustainedAttackEffectPrefab: {fileID: 0}
-  SustainedAttackProjectilePrefab: {fileID: 0}
-  SustainedAttackProjectileRotationOffset: {x: 0, y: 0, z: 0}
   SustainedAttackProjectileLifetime: 0.75
   StrongAttackDeliveryType: 0
   StrongAttackProjectileCount: 3
@@ -57,8 +54,25 @@ MonoBehaviour:
   MeleeWeaponEffectPrefabs:
   - {fileID: 1537593200154216, guid: 45f087c215510da4dba5f27de73c397b, type: 3}
   - {fileID: 5244990466572478861, guid: a701d73488eaeff45bddb860da6e3236, type: 3}
-  RangedProjectilePrefabs: []
+  RangedProjectileVisualPrefabs: []
   BossElementVariations: []
+  MeleeAttackSound:
+    Volume: 0.3
+    Clips:
+    - {fileID: 8300000, guid: c28c687f3ea410849a7785c3bf307920, type: 3}
+  MagicAttackSound:
+    Volume: 1
+    Clips: []
+  HitSound:
+    Volume: 0.6
+    Clips:
+    - {fileID: 8300000, guid: e47c396d990a0a74ebfda8f181b9a4b9, type: 3}
+  AggressionSound:
+    Volume: 1
+    Clips: []
+  AirAttackLoopSound:
+    Volume: 1
+    Clips: []
   AggressionAnimationDuration: 1.2
   AggressionPostActionDelay: 0.35
   AttackAnimationDuration: 1

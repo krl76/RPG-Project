@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6880652751124877948}
   - component: {fileID: 4479073823501571368}
   - component: {fileID: 8404408209179563878}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: RangedYellowGun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,6 +158,9 @@ MonoBehaviour:
   _targetLayer:
     serializedVersion: 2
     m_Bits: 128
+  _selfLayer:
+    serializedVersion: 2
+    m_Bits: 1024
   _rigidbody: {fileID: 4479073823501571368}
 --- !u!1001 &4894746345734968976
 PrefabInstance:

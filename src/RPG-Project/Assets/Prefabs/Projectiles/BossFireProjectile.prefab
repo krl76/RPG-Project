@@ -24291,6 +24291,9 @@ MonoBehaviour:
   _targetLayer:
     serializedVersion: 2
     m_Bits: 128
+  _selfLayer:
+    serializedVersion: 2
+    m_Bits: 1024
   _rigidbody: {fileID: -3301237547331984821}
 --- !u!135 &2111366794754319734
 SphereCollider:

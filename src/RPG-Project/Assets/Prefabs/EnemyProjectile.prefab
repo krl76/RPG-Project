@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4746162465361499796}
   - component: {fileID: 5481031569366015508}
   - component: {fileID: -6479543886755882140}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: EnemyProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -157,4 +157,7 @@ MonoBehaviour:
   _targetLayer:
     serializedVersion: 2
     m_Bits: 128
+  _selfLayer:
+    serializedVersion: 2
+    m_Bits: 1024
   _rigidbody: {fileID: 5481031569366015508}

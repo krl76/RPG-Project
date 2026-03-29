@@ -71,6 +71,7 @@ namespace Core.Gameplay.Pause
             _inputManager.ChangeState(_inputManager.DisabledInputState);
             _windowService.Open(WindowID.Pause);
 
+            AudioListener.pause = true;
             Time.timeScale = 0f;
             _gameStateService.Enter(GameState.Paused);
             Cursor.lockState = CursorLockMode.None;
@@ -94,6 +95,7 @@ namespace Core.Gameplay.Pause
                 _windowService.Close(WindowID.Pause);
             }
 
+            AudioListener.pause = false;
             Time.timeScale = 1f;
             _inputManager.ChangeState(_inputManager.GameplayInputState);
             _gameStateService.Enter(GameState.Gameplay);
@@ -175,6 +177,7 @@ namespace Core.Gameplay.Pause
                 _windowService.Close(WindowID.Pause);
             }
 
+            AudioListener.pause = false;
             Time.timeScale = 1f;
             _inputManager.ChangeState(_inputManager.DisabledInputState);
             Cursor.lockState = CursorLockMode.None;

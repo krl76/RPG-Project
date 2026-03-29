@@ -15,7 +15,7 @@ MonoBehaviour:
   PlayerMeleeAttack:
     Volume: 1
     Clips:
-    - {fileID: 8300000, guid: e47c396d990a0a74ebfda8f181b9a4b9, type: 3}
+    - {fileID: 0}
   PlayerShot:
     Volume: 1
     Clips:
@@ -24,15 +24,3 @@ MonoBehaviour:
     Volume: 1
     Clips:
     - {fileID: 8300000, guid: c4abf6925896a7549bc9fcca6f7cc4a2, type: 3}
-  EnemyMeleeAttack:
-    Volume: 1
-    Clips:
-    - {fileID: 8300000, guid: c28c687f3ea410849a7785c3bf307920, type: 3}
-  EnemyMagicAttack:
-    Volume: 1
-    Clips:
-    - {fileID: 8300000, guid: 4c7b6a284acbbe546a850bfd8350b039, type: 3}
-  EnemyHit:
-    Volume: 1
-    Clips:
-    - {fileID: 8300000, guid: f9b0427cbca64a14f80220f634932dfb, type: 3}

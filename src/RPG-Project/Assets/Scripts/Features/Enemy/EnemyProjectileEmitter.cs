@@ -9,6 +9,8 @@ namespace Features.Enemy
         private IGameObjectFactory _gameObjectFactory;
         private GameObject _projectilePrefab;
         private Transform _target;
+        private CharacterController _targetCharacterController;
+        private Collider _targetCollider;
         private float _projectileDamage;
         private float _projectileSpeed;
         private float _emissionInterval;
@@ -35,6 +37,7 @@ namespace Features.Enemy
             _gameObjectFactory = gameObjectFactory;
             _projectilePrefab = projectilePrefab;
             _target = target;
+            CacheTargetComponents();
             _projectileSpeed = Mathf.Max(0f, projectileSpeed);
             _emissionInterval = Mathf.Max(0.05f, emissionInterval);
             _projectileCount = Mathf.Max(1, projectileCount);
@@ -98,7 +101,7 @@ namespace Features.Enemy
         private Vector3 GetMoveDirection(float angleOffset)
         {
             Vector3 direction = _target != null
-                ? (_target.position - transform.position)
+                ? (GetTargetAimPoint() - transform.position)
                 : transform.forward;
 
             if (direction.sqrMagnitude < 0.0001f)
@@ -107,6 +110,39 @@ namespace Features.Enemy
             }
 
             return Quaternion.Euler(0f, angleOffset, 0f) * direction.normalized;
+        }
+
+        private void CacheTargetComponents()
+        {
+            _targetCharacterController = null;
+            _targetCollider = null;
+
+            if (_target == null)
+            {
+                return;
+            }
+
+            Transform targetRoot = _target.root != null ? _target.root : _target;
+            _targetCharacterController = targetRoot.GetComponentInChildren<CharacterController>();
+            if (_targetCharacterController == null)
+            {
+                _targetCollider = targetRoot.GetComponentInChildren<Collider>();
+            }
+        }
+
+        private Vector3 GetTargetAimPoint()
+        {
+            if (_targetCharacterController != null)
+            {
+                return _targetCharacterController.bounds.center;
+            }
+
+            if (_targetCollider != null)
+            {
+                return _targetCollider.bounds.center;
+            }
+
+            return _target != null ? _target.position : transform.position + transform.forward;
         }
     }
 }

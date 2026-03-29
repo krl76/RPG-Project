@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7004046929701312089}
   - component: {fileID: 4842598333407312847}
   - component: {fileID: 5304296579122360995}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: FireDark
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4859,7 +4859,7 @@ GameObject:
   - component: {fileID: 1467564957463007586}
   - component: {fileID: 574206419841760186}
   - component: {fileID: 8571868932277073064}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Fire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9707,7 +9707,7 @@ GameObject:
   - component: {fileID: 1480359588254608651}
   - component: {fileID: 8990321632873667018}
   - component: {fileID: 9214741351857612551}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Smoke
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14555,7 +14555,7 @@ GameObject:
   - component: {fileID: 8814990825828705672}
   - component: {fileID: 2198474041242795799}
   - component: {fileID: 1846700137902651473}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MeleeYellowGun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19407,7 +19407,7 @@ GameObject:
   - component: {fileID: 1517438369892048349}
   - component: {fileID: 57825697685577707}
   - component: {fileID: 6498669040449371735}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Sparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}

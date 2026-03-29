@@ -8,6 +8,7 @@ namespace Infrastructure.Services.Audio
     public sealed class EffectsAudioService : IEffectsAudioService, IDisposable
     {
         private readonly AudioSource _audioSource;
+        private readonly AudioMixerGroup _sfxMixerGroup;
 
         public EffectsAudioService(AudioMixer audioMixer)
         {
@@ -15,9 +16,7 @@ namespace Infrastructure.Services.Audio
             Object.DontDestroyOnLoad(audioRoot);
 
             _audioSource = audioRoot.AddComponent<AudioSource>();
-            _audioSource.playOnAwake = false;
-            _audioSource.loop = false;
-            _audioSource.spatialBlend = 0f;
+            ConfigureAudioSource(_audioSource);
 
             if (audioMixer == null)
             {
@@ -32,7 +31,8 @@ namespace Infrastructure.Services.Audio
                 return;
             }
 
-            _audioSource.outputAudioMixerGroup = groups[0];
+            _sfxMixerGroup = groups[0];
+            _audioSource.outputAudioMixerGroup = _sfxMixerGroup;
         }
 
         public void PlayOneShot(AudioClip clip, float volume = 1f)
@@ -45,12 +45,38 @@ namespace Infrastructure.Services.Audio
             _audioSource.PlayOneShot(clip, Mathf.Clamp01(volume));
         }
 
+        public AudioSource CreateConfiguredSource(Transform parent = null, string sourceName = null)
+        {
+            var sourceObject = new GameObject(string.IsNullOrWhiteSpace(sourceName) ? "[EffectsAudioSource]" : sourceName);
+            if (parent != null)
+            {
+                sourceObject.transform.SetParent(parent, false);
+            }
+
+            var source = sourceObject.AddComponent<AudioSource>();
+            ConfigureAudioSource(source);
+            source.outputAudioMixerGroup = _sfxMixerGroup;
+            return source;
+        }
+
         public void Dispose()
         {
             if (_audioSource != null)
             {
                 Object.Destroy(_audioSource.gameObject);
             }
+        }
+
+        private static void ConfigureAudioSource(AudioSource audioSource)
+        {
+            if (audioSource == null)
+            {
+                return;
+            }
+
+            audioSource.playOnAwake = false;
+            audioSource.loop = false;
+            audioSource.spatialBlend = 0f;
         }
     }
 }
