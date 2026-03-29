@@ -1,30 +1,61 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Features.Combat
 {
     [RequireComponent(typeof(Rigidbody))]
     public class MagicProjectile : MonoBehaviour
     {
+        private const float FallbackCollisionRadius = 0.05f;
+
         private float _speed;
         private float _damage;
         private Vector3 _moveDirection;
         private bool _hasCustomMoveDirection;
         [SerializeField] private float _lifetime = 3f;
         [SerializeField] private LayerMask _targetLayer = ~0;
+        [SerializeField] private LayerMask _selfLayer = 0;
         [SerializeField] private Rigidbody _rigidbody;
+        [SerializeField] private Collider _collisionTrigger;
         private bool _isMoving;
+        private float _cachedCollisionRadius = -1f;
+        private readonly RaycastHit[] _hitBuffer = new RaycastHit[8];
+
+        private void Awake()
+        {
+            if (_rigidbody == null)
+            {
+                _rigidbody = GetComponent<Rigidbody>();
+            }
+
+            if (_collisionTrigger == null)
+            {
+                _collisionTrigger = GetComponent<Collider>();
+            }
+        }
 
         private void OnTriggerEnter(Collider other)
-        {
-            IDamageable damageable = other.GetComponentInParent<IDamageable>();
-            if (damageable == null)
+        { 
+            int otherLayer = other.gameObject.layer;
+            if (((1 << otherLayer) & _selfLayer.value) != 0)
             {
                 return;
             }
 
-            int targetLayer = ResolveTargetLayer(other, damageable);
-            if (((1 << targetLayer) & _targetLayer.value) == 0)
+            IDamageable damageable = other.GetComponentInChildren<IDamageable>();
+            if (damageable == null)
             {
+                damageable = other.GetComponent<IDamageable>();
+                if (damageable == null)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+            }
+
+            if (((1 << otherLayer) & _targetLayer.value) == 0)
+            {
+                Destroy(gameObject);
                 return;
             }
 
@@ -34,11 +65,21 @@ namespace Features.Combat
 
         private void Update()
         {
-            if (_isMoving)
+            if (_isMoving == false)
             {
-                Vector3 moveDirection = _hasCustomMoveDirection ? _moveDirection : transform.forward;
-                transform.position += moveDirection * (_speed * Time.deltaTime);
+                return;
             }
+
+            Vector3 moveDirection = _hasCustomMoveDirection ? _moveDirection : transform.forward;
+            float travelDistance = _speed * Time.deltaTime;
+            if (travelDistance <= 0f)
+            {
+                return;
+            }
+
+            Vector3 currentPosition = transform.position;
+
+            transform.position = currentPosition + moveDirection * travelDistance;
         }
 
         public void Setup(float damage, float speed, float downwardTiltAngle = 0)
@@ -64,17 +105,6 @@ namespace Features.Combat
 
             _moveDirection = moveDirection.normalized;
             _hasCustomMoveDirection = true;
-        }
-
-        private static int ResolveTargetLayer(Collider other, IDamageable damageable)
-        {
-            if (damageable is Component damageableComponent)
-            {
-                return damageableComponent.gameObject.layer;
-            }
-
-            Transform root = other.transform.root;
-            return root != null ? root.gameObject.layer : other.gameObject.layer;
         }
     }
 }

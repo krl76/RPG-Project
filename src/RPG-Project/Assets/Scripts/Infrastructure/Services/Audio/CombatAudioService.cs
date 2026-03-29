@@ -20,9 +20,6 @@ namespace Infrastructure.Services.Audio
         public void PlayPlayerMeleeAttack() => PlayCue(_configDataProvider.GetCombatAudioConfig()?.PlayerMeleeAttack);
         public void PlayPlayerShot() => PlayCue(_configDataProvider.GetCombatAudioConfig()?.PlayerShot);
         public void PlayPlayerHit() => PlayCue(_configDataProvider.GetCombatAudioConfig()?.PlayerHit);
-        public void PlayEnemyMeleeAttack() => PlayCue(_configDataProvider.GetCombatAudioConfig()?.EnemyMeleeAttack);
-        public void PlayEnemyMagicAttack() => PlayCue(_configDataProvider.GetCombatAudioConfig()?.EnemyMagicAttack);
-        public void PlayEnemyHit() => PlayCue(_configDataProvider.GetCombatAudioConfig()?.EnemyHit);
 
         private void PlayCue(CombatAudioConfig.AudioCue? cue)
         {

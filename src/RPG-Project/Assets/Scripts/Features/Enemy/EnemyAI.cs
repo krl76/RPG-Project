@@ -7,6 +7,7 @@ using Infrastructure.Factories.Objects;
 using Infrastructure.Services.Audio;
 using Infrastructure.Services.Enemy;
 using Infrastructure.Services.Player;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using Zenject;
@@ -16,6 +17,8 @@ namespace Features.Enemy
     [RequireComponent(typeof(NavMeshAgent), typeof(Animator), typeof(EnemyAnimation))]
     public class EnemyAI : MonoBehaviour, IDamageable
     {
+        private static readonly Dictionary<string, int> LastVariationIndexByKey = new();
+
         public bool IsAlive => _currentHealth > 0f;
         public float CurrentHealth => _currentHealth;
         public string SaveId => SceneObjectSaveId.Build(transform);
@@ -39,21 +42,33 @@ namespace Features.Enemy
         private bool _isProvoked;
         private bool _isEnraged;
         private bool _actionImpactConsumed;
+        private bool _locomotionRequested;
+        private bool _fleeLocomotionRequested;
+        private bool _appliedMoveAnimation;
+        private bool _appliedFleeAnimation;
+        private int _selectedRegularVariationIndex = -1;
+        private int _selectedBossElementIndex = -1;
+        private int _lastBossMeleeAudioClipIndex = -1;
+        private int _lastBossMagicAudioClipIndex = -1;
 
         private Transform _playerTransform;
         private IDamageable _playerDamageable;
 
         private EnemyActionType _currentAction = EnemyActionType.None;
         private GameObject _activeSustainedAttackEffect;
+        private GameObject _activeWeaponEffect;
+        private BossElementVariation _selectedBossElementVariation;
         private EnemyAnimation _enemyAnimation;
         private EnemyStateMachine _stateMachine;
+        private AudioSource _stateAudioSource;
+        private AudioSource _loopingStateAudioSource;
         private NavMeshAgent _agent;
         private IHealthFeedback _healthFeedback;
         private IGameObjectFactory _gameObjectFactory;
         private IEnemyService _enemyService;
         private IEnemyModeService _enemyModeService;
         private IPlayerService _playerService;
-        private ICombatAudioService _combatAudioService;
+        private IEffectsAudioService _effectsAudioService;
 
         [Inject]
         private void Construct(
@@ -61,13 +76,13 @@ namespace Features.Enemy
             IGameObjectFactory gameObjectFactory,
             IEnemyService enemyService,
             IEnemyModeService enemyModeService,
-            ICombatAudioService combatAudioService)
+            IEffectsAudioService effectsAudioService)
         {
             _playerService = playerService;
             _gameObjectFactory = gameObjectFactory;
             _enemyService = enemyService;
             _enemyModeService = enemyModeService;
-            _combatAudioService = combatAudioService;
+            _effectsAudioService = effectsAudioService;
         }
 
         public bool IsActionInProgress => _currentAction != EnemyActionType.None;
@@ -84,9 +99,12 @@ namespace Features.Enemy
             _agent = GetComponent<NavMeshAgent>();
             _enemyAnimation = GetComponent<EnemyAnimation>();
             _healthFeedback = GetComponentInChildren<IHealthFeedback>();
+            _stateAudioSource = _effectsAudioService?.CreateConfiguredSource(transform, "[EnemyStateAudio]");
+            _loopingStateAudioSource = _effectsAudioService?.CreateConfiguredSource(transform, "[EnemyLoopingStateAudio]");
 
             _baseAgentSpeed = _agent.speed;
             _currentHealth = Config != null ? Config.MaxHealth : 0f;
+            InitializeVisualVariation();
 
             _enemyAnimation.OnAttackImpact += OnAttackImpact;
             _enemyAnimation.OnStrongAttackImpact += OnStrongAttackImpact;
@@ -116,6 +134,7 @@ namespace Features.Enemy
             RefreshPlayerReferences();
             UpdateActionTimeout();
             _stateMachine.Tick();
+            RefreshLocomotionAnimation();
         }
 
         private void OnDestroy()
@@ -130,6 +149,9 @@ namespace Features.Enemy
             }
 
             StopSustainedAttackEffect();
+            StopStateAudio();
+            StopLoopingStateAudio();
+            DestroyActiveWeaponEffect();
             _enemyService?.Unregister(this);
         }
 
@@ -289,7 +311,7 @@ namespace Features.Enemy
             _agent.isStopped = false;
             _agent.SetDestination(_playerTransform.position);
 
-            SetMovementAnimation(isMoving: true, isFleeing: false);
+            RequestLocomotion(isMoving: true, isFleeing: false);
         }
 
         public void MoveAwayFromTarget()
@@ -329,7 +351,7 @@ namespace Features.Enemy
             _agent.SetDestination(fleeTarget);
             _nextFleeRepathTime = Time.time + Config.FleeRepathInterval;
 
-            SetMovementAnimation(isMoving: true, isFleeing: true);
+            RequestLocomotion(isMoving: true, isFleeing: true);
         }
 
         public bool HasReachedSafeDistance()
@@ -350,7 +372,7 @@ namespace Features.Enemy
                 _agent.speed = _baseAgentSpeed;
             }
 
-            SetMovementAnimation(isMoving: false, isFleeing: false);
+            RequestLocomotion(isMoving: false, isFleeing: false);
         }
 
         public void LookAtTarget()
@@ -379,6 +401,7 @@ namespace Features.Enemy
             StartAction(EnemyActionType.Aggression, Config.AggressionAnimationDuration);
             StopMovement();
             _enemyAnimation.PlayAggression();
+            PlayAudioCue(Config.AggressionSound, 0, Config.BehaviourType == EnemyBehaviourType.Boss);
         }
 
         public void StartPrimaryAttack()
@@ -403,6 +426,7 @@ namespace Features.Enemy
             StartAction(EnemyActionType.AirAttack, Config.AirAttackAnimationDuration);
             StopMovement();
             _enemyAnimation.PlayAirAttack();
+            PlayLoopingAudioCue(Config.AirAttackLoopSound, GetMagicAttackAudioVariationIndex());
         }
 
         public void StartEnrageAction()
@@ -432,7 +456,7 @@ namespace Features.Enemy
 
             float actualDamage = Mathf.Max(0f, amount * GetIncomingDamageMultiplier());
             _currentHealth = Mathf.Max(0f, _currentHealth - actualDamage);
-            _combatAudioService.PlayEnemyHit();
+            PlayAudioCue(Config.HitSound, 0);
             PublishHealth();
 
             if (Config.BehaviourType == EnemyBehaviourType.Boss || _enemyModeService.IsPeacefulModeEnabled == false)
@@ -479,6 +503,10 @@ namespace Features.Enemy
                 IsAlive = IsAlive,
                 IsProvoked = _isProvoked,
                 IsEnraged = _isEnraged,
+                HasSelectedRegularVariation = _selectedRegularVariationIndex >= 0,
+                SelectedRegularVariationIndex = _selectedRegularVariationIndex,
+                HasSelectedBossElement = _selectedBossElementIndex >= 0,
+                SelectedBossElementIndex = _selectedBossElementIndex,
                 CurrentHealth = Mathf.Max(0f, _currentHealth),
                 MaxHealth = Config != null ? Config.MaxHealth : 0f,
                 RuntimeStateId = CurrentStateId.ToString(),
@@ -497,6 +525,7 @@ namespace Features.Enemy
             _currentHealth = Mathf.Clamp(data.CurrentHealth, 0f, Config.MaxHealth);
             _isProvoked = data.IsProvoked;
             _isEnraged = data.IsEnraged;
+            RestoreVisualVariation(data);
             PublishHealth();
 
             if (data.IsAlive == false || _currentHealth <= 0f)
@@ -602,6 +631,8 @@ namespace Features.Enemy
         private void ResetActionState()
         {
             StopSustainedAttackEffect();
+            StopStateAudio();
+            StopLoopingStateAudio();
             _currentAction = EnemyActionType.None;
             _actionImpactConsumed = false;
             _actionTimeoutAt = 0f;
@@ -619,20 +650,18 @@ namespace Features.Enemy
                 return;
             }
 
-            ResetActionState();
+            CompleteAction(applyBossPostActionDelay: false);
         }
 
         private void OnActionCompleted()
         {
-            ApplyBossPostActionDelay();
-
             if (_currentAction == EnemyActionType.AirAttack
                 && _enemyAnimation.IsCurrentStateOrTransitioningTo("Land") == false)
             {
                 return;
             }
 
-            ResetActionState();
+            CompleteAction(applyBossPostActionDelay: true);
         }
 
         private void OnAttackEffectCompleted()
@@ -644,6 +673,7 @@ namespace Features.Enemy
             }
 
             StopSustainedAttackEffect();
+            StopStateAudio();
         }
 
         private void OnAttackImpact()
@@ -687,7 +717,12 @@ namespace Features.Enemy
             float damage = Config.Damage * GetCurrentDamageMultiplier();
             if (IsUsingRangedAttack())
             {
-                ExecuteRangedAttack(damage, Config.ProjectileSpeed, 1, 0f);
+                ExecuteRangedAttack(
+                    damage,
+                    Config.ProjectileSpeed,
+                    1,
+                    0f,
+                    GetActivePrimaryProjectilePrefab());
                 return;
             }
 
@@ -698,6 +733,7 @@ namespace Features.Enemy
         {
             float damage = Config.Damage * Config.StrongAttackDamageMultiplier * GetCurrentDamageMultiplier();
             EnemyAttackDeliveryType deliveryType = ResolveStrongAttackDeliveryType();
+            GameObject strongAttackProjectilePrefab = GetStrongAttackProjectilePrefab();
 
             if (deliveryType == EnemyAttackDeliveryType.SustainedEffect)
             {
@@ -709,13 +745,14 @@ namespace Features.Enemy
                 return;
             }
 
-            if (deliveryType == EnemyAttackDeliveryType.Ranged && Config.ProjectilePrefab != null)
+            if (deliveryType == EnemyAttackDeliveryType.Ranged && strongAttackProjectilePrefab != null)
             {
                 ExecuteRangedAttack(
                     damage,
                     Config.ProjectileSpeed * Config.StrongAttackProjectileSpeedMultiplier,
                     Mathf.Max(1, Config.StrongAttackProjectileCount),
-                    Config.StrongAttackProjectileSpreadAngle);
+                    Config.StrongAttackProjectileSpreadAngle,
+                    strongAttackProjectilePrefab);
                 return;
             }
 
@@ -734,30 +771,36 @@ namespace Features.Enemy
 
         private void ExecuteMeleeAttack(float damage, float radius)
         {
-            _combatAudioService.PlayEnemyMeleeAttack();
+            bool shouldInterruptWithState = Config.BehaviourType == EnemyBehaviourType.Boss
+                && _currentAction == EnemyActionType.Attack;
 
-            Vector3 attackPosition = _meleeAttackPoint != null ? _meleeAttackPoint.position : transform.position;
-            Collider[] hitColliders = Physics.OverlapSphere(attackPosition, radius, _playerLayer);
-
-            foreach (Collider hitCollider in hitColliders)
+            if (Config.BehaviourType == EnemyBehaviourType.Boss)
             {
-                if (hitCollider.TryGetComponent<IDamageable>(out IDamageable victim) && victim.IsAlive)
-                {
-                    victim.TakeDamage(damage);
-                    break;
-                }
+                PlayBossAttackAudioCue(Config.MeleeAttackSound, ref _lastBossMeleeAudioClipIndex, shouldInterruptWithState);
             }
+            else
+            {
+                PlayAudioCue(Config.MeleeAttackSound, 0, shouldInterruptWithState);
+            }
+
+            if (TryGetDamageableInMeleeRadius(radius, out IDamageable victim))
+            {
+                victim.TakeDamage(damage);
+                return;
+            }
+
         }
 
         private void ExecuteRangedAttack(
             float damage,
             float projectileSpeed,
             int projectileCount,
-            float spreadAngle)
+            float spreadAngle,
+            GameObject projectilePrefab)
         {
-            _combatAudioService.PlayEnemyMagicAttack();
+            PlayConfiguredMagicAttackSound();
 
-            if (Config.ProjectilePrefab == null)
+            if (projectilePrefab == null)
             {
                 return;
             }
@@ -769,17 +812,42 @@ namespace Features.Enemy
             for (int i = 0; i < safeProjectileCount; i++)
             {
                 float angleOffset = startAngle + spreadAngle * i;
-                Quaternion rotation = origin.rotation * Quaternion.Euler(0f, angleOffset, 0f);
+                Vector3 moveDirection = GetRangedAttackDirection(origin, angleOffset);
+                Quaternion rotation = moveDirection.sqrMagnitude > 0.0001f
+                    ? Quaternion.LookRotation(moveDirection, Vector3.up)
+                    : origin.rotation * Quaternion.Euler(0f, angleOffset, 0f);
                 GameObject projectile = _gameObjectFactory.Instantiate(
-                    Config.ProjectilePrefab,
+                    projectilePrefab,
                     origin.position,
                     rotation);
 
                 if (projectile.TryGetComponent(out MagicProjectile magicProjectile))
                 {
+                    magicProjectile.SetMoveDirection(moveDirection);
                     magicProjectile.Setup(damage, projectileSpeed);
                 }
             }
+        }
+
+        private Vector3 GetRangedAttackDirection(Transform origin, float angleOffset)
+        {
+            Vector3 baseDirection;
+            if (_playerTransform != null)
+            {
+                baseDirection = _playerTransform.position - origin.position;
+                baseDirection.y = 0f;
+            }
+            else
+            {
+                baseDirection = origin.forward;
+            }
+
+            if (baseDirection.sqrMagnitude < 0.0001f)
+            {
+                baseDirection = origin.forward;
+            }
+
+            return Quaternion.Euler(0f, angleOffset, 0f) * baseDirection.normalized;
         }
 
         private float GetCurrentDamageMultiplier() =>
@@ -813,7 +881,7 @@ namespace Features.Enemy
 
         private bool IsUsingRangedAttack()
         {
-            return Config.Type == EnemyType.Ranged && Config.ProjectilePrefab != null;
+            return Config.Type == EnemyType.Ranged && GetActivePrimaryProjectilePrefab() != null;
         }
 
         private bool ShouldPlayHitAnimation()
@@ -870,7 +938,7 @@ namespace Features.Enemy
                 return 1f;
             }
 
-            if (_currentAction == EnemyActionType.Enrage || CurrentStateId == EnemyStateId.Enrage)
+            if (_isEnraged || GetHealthRatio() <= Config.EnrageHealthThreshold)
             {
                 return Mathf.Clamp01(Config.DefendDamageTakenMultiplier);
             }
@@ -908,21 +976,20 @@ namespace Features.Enemy
                 return Config.StrongAttackDeliveryType;
             }
 
-            if (Config.SustainedAttackEffectPrefab != null)
+            if (GetActiveSustainedAttackEffectPrefab() != null
+                || GetSustainedProjectilePrefab() != null)
             {
                 return EnemyAttackDeliveryType.SustainedEffect;
             }
 
-            return Config.ProjectilePrefab != null
+            return GetStrongAttackProjectilePrefab() != null
                 ? EnemyAttackDeliveryType.Ranged
                 : EnemyAttackDeliveryType.Melee;
         }
 
         private GameObject GetSustainedProjectilePrefab()
         {
-            return Config.SustainedAttackProjectilePrefab != null
-                ? Config.SustainedAttackProjectilePrefab
-                : Config.ProjectilePrefab;
+            return _selectedBossElementVariation?.SustainedAttackProjectilePrefab;
         }
 
         private void SetMovementAnimation(bool isMoving, bool isFleeing)
@@ -932,9 +999,100 @@ namespace Features.Enemy
             _enemyAnimation.SetIsFleeing(isFleeing);
             _enemyAnimation.SetRunSpeed(isMoving ? 1f : 0f);
 
-            if (IsActionInProgress == false)
+            _enemyAnimation.SyncLocomotionState(isMoving);
+        }
+
+        private void RequestLocomotion(bool isMoving, bool isFleeing)
+        {
+            _locomotionRequested = isMoving;
+            _fleeLocomotionRequested = isMoving && isFleeing;
+        }
+
+        private void RefreshLocomotionAnimation()
+        {
+            bool shouldAnimateMovement = ShouldAnimateMovement();
+            bool shouldAnimateFlee = shouldAnimateMovement && _fleeLocomotionRequested;
+
+            if (_appliedMoveAnimation == shouldAnimateMovement
+                && _appliedFleeAnimation == shouldAnimateFlee)
             {
-                _enemyAnimation.SyncLocomotionState(isMoving);
+                return;
+            }
+
+            _appliedMoveAnimation = shouldAnimateMovement;
+            _appliedFleeAnimation = shouldAnimateFlee;
+            SetMovementAnimation(shouldAnimateMovement, shouldAnimateFlee);
+        }
+
+        private bool ShouldAnimateMovement()
+        {
+            if (_locomotionRequested == false
+                || _enemyAnimation == null
+                || IsActionInProgress
+                || IsCurrentActionAnimationLocked())
+            {
+                return false;
+            }
+
+            if (CanUseAgent() == false)
+            {
+                return false;
+            }
+
+            if (_agent.isStopped)
+            {
+                return false;
+            }
+
+            if (_agent.velocity.sqrMagnitude > 0.01f)
+            {
+                return true;
+            }
+
+            if (_agent.pathPending || _agent.hasPath == false)
+            {
+                return false;
+            }
+
+            if (float.IsInfinity(_agent.remainingDistance))
+            {
+                return false;
+            }
+
+            return _agent.remainingDistance > Mathf.Max(_agent.stoppingDistance + 0.15f, 0.2f);
+        }
+
+        private void CompleteAction(bool applyBossPostActionDelay)
+        {
+            EnemyActionType completedAction = _currentAction;
+            if (completedAction == EnemyActionType.None)
+            {
+                return;
+            }
+
+            if (applyBossPostActionDelay)
+            {
+                ApplyBossPostActionDelay();
+            }
+
+            RotateAttackVariationAfterAction(completedAction);
+            ResetActionState();
+        }
+
+        private void RotateAttackVariationAfterAction(EnemyActionType completedAction)
+        {
+            if (Config.BehaviourType == EnemyBehaviourType.Regular
+                && completedAction == EnemyActionType.Attack)
+            {
+                AdvanceRegularAttackVariation();
+                return;
+            }
+
+            if (Config.BehaviourType == EnemyBehaviourType.Boss
+                && (completedAction == EnemyActionType.StrongAttack
+                    || completedAction == EnemyActionType.AirAttack))
+            {
+                AdvanceBossAttackVariation();
             }
         }
 
@@ -948,13 +1106,15 @@ namespace Features.Enemy
                 return;
             }
 
-            if (Config.SustainedAttackEffectPrefab != null)
+            GameObject sustainedAttackEffectPrefab = GetActiveSustainedAttackEffectPrefab();
+            if (sustainedAttackEffectPrefab != null)
             {
                 _activeSustainedAttackEffect = _gameObjectFactory.Instantiate(
-                    Config.SustainedAttackEffectPrefab,
+                    sustainedAttackEffectPrefab,
                     origin.position,
                     origin.rotation,
                     origin);
+                SetWorldScale(_activeSustainedAttackEffect.transform, Vector3.one);
             }
             else
             {
@@ -962,6 +1122,7 @@ namespace Features.Enemy
                 _activeSustainedAttackEffect.transform.SetParent(origin, false);
                 _activeSustainedAttackEffect.transform.localPosition = Vector3.zero;
                 _activeSustainedAttackEffect.transform.localRotation = Quaternion.identity;
+                SetWorldScale(_activeSustainedAttackEffect.transform, Vector3.one);
             }
 
             GameObject sustainedProjectilePrefab = GetSustainedProjectilePrefab();
@@ -985,7 +1146,7 @@ namespace Features.Enemy
                     projectileSpeed,
                     emissionInterval,
                     visualProjectileLifetime: Config.SustainedAttackProjectileLifetime,
-                    visualRotationOffset: Config.SustainedAttackProjectileRotationOffset);
+                    visualRotationOffset: GetActiveSustainedProjectileRotationOffset());
             }
             else
             {
@@ -1003,7 +1164,7 @@ namespace Features.Enemy
                 damageEffect.Setup(damagePerSecond, emissionInterval, radius, _playerLayer);
             }
 
-            _combatAudioService.PlayEnemyMagicAttack();
+            PlayConfiguredMagicAttackSound();
         }
 
         private void StopSustainedAttackEffect()
@@ -1103,6 +1264,78 @@ namespace Features.Enemy
             Gizmos.DrawWireSphere(origin, radius);
         }
 
+        private static void SetWorldScale(Transform target, Vector3 worldScale)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            Transform parent = target.parent;
+            if (parent == null)
+            {
+                target.localScale = worldScale;
+                return;
+            }
+
+            Vector3 parentScale = parent.lossyScale;
+            target.localScale = new Vector3(
+                DivideScaleAxis(worldScale.x, parentScale.x),
+                DivideScaleAxis(worldScale.y, parentScale.y),
+                DivideScaleAxis(worldScale.z, parentScale.z));
+        }
+
+        private static float DivideScaleAxis(float scale, float parentScale)
+        {
+            return Mathf.Abs(parentScale) > 0.0001f
+                ? scale / parentScale
+                : scale;
+        }
+
+        private Transform GetMeleeAttackOrigin()
+        {
+            return _meleeAttackPoint != null ? _meleeAttackPoint : transform;
+        }
+
+        private bool TryGetDamageableInMeleeRadius(float radius, out IDamageable victim)
+        {
+            Transform attackOrigin = GetMeleeAttackOrigin();
+            Collider[] hitColliders = Physics.OverlapSphere(
+                attackOrigin.position,
+                radius,
+                ~0,
+                QueryTriggerInteraction.Collide);
+
+            for (int i = 0; i < hitColliders.Length; i++)
+            {
+                if (TryResolveDamageable(hitColliders[i], out victim)
+                    && IsAllowedTarget(victim))
+                {
+                    return true;
+                }
+            }
+
+            victim = null;
+            return false;
+        }
+
+        private static bool TryResolveDamageable(Collider hitCollider, out IDamageable victim)
+        {
+            victim = hitCollider.GetComponentInParent<IDamageable>();
+            return victim != null && victim.IsAlive;
+        }
+
+        private bool IsAllowedTarget(IDamageable victim)
+        {
+            if (victim is not Component victimComponent)
+            {
+                return false;
+            }
+
+            int victimLayer = victimComponent.gameObject.layer;
+            return ((_playerLayer.value >> victimLayer) & 1) != 0;
+        }
+
         private void SetPositionAndRotation(Vector3 position, Quaternion rotation)
         {
             if (CanUseAgent())
@@ -1122,6 +1355,476 @@ namespace Features.Enemy
             }
 
             transform.rotation = rotation;
+        }
+
+        private void InitializeVisualVariation()
+        {
+            if (Config == null)
+            {
+                return;
+            }
+
+            if (Config.BehaviourType == EnemyBehaviourType.Boss)
+            {
+                ApplyBossElementVariation(
+                    ChooseNonRepeatingVariationIndex(GetBossVariationKey(), Config.BossElementVariations.Count),
+                    rememberChoice: true);
+                return;
+            }
+
+            ApplyRegularVariation(
+                ChooseNonRepeatingVariationIndex(GetRegularVariationKey(), GetRegularVariationCount()),
+                rememberChoice: true);
+        }
+
+        private void AdvanceRegularAttackVariation()
+        {
+            int variationCount = GetRegularVariationCount();
+            if (variationCount <= 1)
+            {
+                return;
+            }
+
+            ApplyRegularVariation(
+                ChooseNextNonRepeatingIndex(_selectedRegularVariationIndex, variationCount),
+                rememberChoice: false);
+        }
+
+        private void AdvanceBossAttackVariation()
+        {
+            int variationCount = Config.BossElementVariations.Count;
+            if (variationCount <= 1)
+            {
+                return;
+            }
+
+            ApplyBossElementVariation(
+                ChooseNextNonRepeatingIndex(_selectedBossElementIndex, variationCount),
+                rememberChoice: false);
+        }
+
+        private void RestoreVisualVariation(EnemySaveData data)
+        {
+            if (data == null)
+            {
+                return;
+            }
+
+            if (Config.BehaviourType == EnemyBehaviourType.Boss)
+            {
+                if (data.HasSelectedBossElement)
+                {
+                    ApplyBossElementVariation(data.SelectedBossElementIndex, rememberChoice: false);
+                }
+
+                return;
+            }
+
+            if (data.HasSelectedRegularVariation)
+            {
+                ApplyRegularVariation(data.SelectedRegularVariationIndex, rememberChoice: false);
+            }
+        }
+
+        private void ApplyRegularVariation(int index, bool rememberChoice)
+        {
+            _selectedRegularVariationIndex = NormalizeVariationIndex(index, GetRegularVariationCount());
+            if (rememberChoice && _selectedRegularVariationIndex >= 0)
+            {
+                LastVariationIndexByKey[GetRegularVariationKey()] = _selectedRegularVariationIndex;
+            }
+
+            RebuildWeaponEffectVisual();
+        }
+
+        private void ApplyBossElementVariation(int index, bool rememberChoice)
+        {
+            _selectedBossElementIndex = NormalizeVariationIndex(index, Config.BossElementVariations.Count);
+            _selectedBossElementVariation = _selectedBossElementIndex >= 0
+                ? Config.BossElementVariations[_selectedBossElementIndex]
+                : null;
+
+            if (rememberChoice && _selectedBossElementIndex >= 0)
+            {
+                LastVariationIndexByKey[GetBossVariationKey()] = _selectedBossElementIndex;
+            }
+
+            RebuildWeaponEffectVisual();
+        }
+
+        private void RebuildWeaponEffectVisual()
+        {
+            DestroyActiveWeaponEffect();
+
+            GameObject weaponEffectPrefab = GetActiveWeaponEffectPrefab();
+            Transform attachPoint = _meleeAttackPoint != null ? _meleeAttackPoint : transform;
+            if (weaponEffectPrefab == null || attachPoint == null)
+            {
+                return;
+            }
+
+            _activeWeaponEffect = _gameObjectFactory != null
+                ? _gameObjectFactory.Instantiate(
+                    weaponEffectPrefab,
+                    attachPoint.position,
+                    attachPoint.rotation,
+                    attachPoint)
+                : Instantiate(weaponEffectPrefab, attachPoint.position, attachPoint.rotation, attachPoint);
+
+            _activeWeaponEffect.transform.localPosition = Vector3.zero;
+            _activeWeaponEffect.transform.localRotation = Quaternion.identity;
+        }
+
+        private void DestroyActiveWeaponEffect()
+        {
+            if (_activeWeaponEffect == null)
+            {
+                return;
+            }
+
+            if (_gameObjectFactory != null)
+            {
+                _gameObjectFactory.Destroy(_activeWeaponEffect);
+            }
+            else
+            {
+                Destroy(_activeWeaponEffect);
+            }
+
+            _activeWeaponEffect = null;
+        }
+
+        private int GetRegularVariationCount()
+        {
+            return Config.Type == EnemyType.Melee
+                ? Config.MeleeWeaponEffectPrefabs.Count
+                : GetRegularRangedVariationCount();
+        }
+
+        private string GetRegularVariationKey() =>
+            $"regular:{Config.Id}:{Config.Type}";
+
+        private string GetBossVariationKey() =>
+            $"boss:{Config.Id}:element";
+
+        private static int ChooseNonRepeatingVariationIndex(string key, int count)
+        {
+            if (count <= 0)
+            {
+                return -1;
+            }
+
+            if (count == 1)
+            {
+                LastVariationIndexByKey[key] = 0;
+                return 0;
+            }
+
+            if (LastVariationIndexByKey.TryGetValue(key, out int lastIndex) == false
+                || lastIndex < 0
+                || lastIndex >= count)
+            {
+                int firstIndex = Random.Range(0, count);
+                LastVariationIndexByKey[key] = firstIndex;
+                return firstIndex;
+            }
+
+            int selectedIndex = Random.Range(0, count - 1);
+            if (selectedIndex >= lastIndex)
+            {
+                selectedIndex++;
+            }
+
+            LastVariationIndexByKey[key] = selectedIndex;
+            return selectedIndex;
+        }
+
+        private static int NormalizeVariationIndex(int index, int count)
+        {
+            return index >= 0 && index < count ? index : -1;
+        }
+
+        private static int ChooseNextNonRepeatingIndex(int previousIndex, int count)
+        {
+            if (count <= 0)
+            {
+                return -1;
+            }
+
+            if (count == 1)
+            {
+                return 0;
+            }
+
+            int normalizedPreviousIndex = NormalizeVariationIndex(previousIndex, count);
+            if (normalizedPreviousIndex < 0)
+            {
+                return Random.Range(0, count);
+            }
+
+            int selectedIndex = Random.Range(0, count - 1);
+            if (selectedIndex >= normalizedPreviousIndex)
+            {
+                selectedIndex++;
+            }
+
+            return selectedIndex;
+        }
+
+        private GameObject GetSelectedRegularProjectilePrefab()
+        {
+            if (Config.Type != EnemyType.Ranged
+                || _selectedRegularVariationIndex < 0
+                || _selectedRegularVariationIndex >= Config.RangedProjectileVisualPrefabs.Count)
+            {
+                return null;
+            }
+
+            return Config.RangedProjectileVisualPrefabs[_selectedRegularVariationIndex];
+        }
+
+        private GameObject GetActivePrimaryProjectilePrefab()
+        {
+            if (Config.Type == EnemyType.Ranged)
+            {
+                return GetSelectedRegularProjectilePrefab();
+            }
+
+            return null;
+        }
+
+        private GameObject GetStrongAttackProjectilePrefab()
+        {
+            GameObject sustainedProjectilePrefab = GetSustainedProjectilePrefab();
+            if (sustainedProjectilePrefab != null)
+            {
+                return sustainedProjectilePrefab;
+            }
+
+            return GetActivePrimaryProjectilePrefab();
+        }
+
+        private GameObject GetActiveWeaponEffectPrefab()
+        {
+            if (Config.BehaviourType == EnemyBehaviourType.Boss)
+            {
+                return _selectedBossElementVariation?.MeleeWeaponEffectPrefab;
+            }
+
+            if (Config.Type != EnemyType.Melee || _selectedRegularVariationIndex < 0)
+            {
+                return null;
+            }
+
+            return _selectedRegularVariationIndex < Config.MeleeWeaponEffectPrefabs.Count
+                ? Config.MeleeWeaponEffectPrefabs[_selectedRegularVariationIndex]
+                : null;
+        }
+
+        private GameObject GetActiveSustainedAttackEffectPrefab()
+        {
+            return _selectedBossElementVariation?.SustainedAttackEffectPrefab;
+        }
+
+        private Vector3 GetActiveSustainedProjectileRotationOffset()
+        {
+            return _selectedBossElementVariation != null
+                ? _selectedBossElementVariation.SustainedAttackProjectileRotationOffset
+                : Vector3.zero;
+        }
+
+        private void PlayConfiguredMagicAttackSound()
+        {
+            bool shouldInterruptWithState = Config.BehaviourType == EnemyBehaviourType.Boss
+                && (_currentAction == EnemyActionType.StrongAttack
+                    || _currentAction == EnemyActionType.AirAttack);
+
+            if (Config.BehaviourType == EnemyBehaviourType.Boss)
+            {
+                PlayBossAttackAudioCue(Config.MagicAttackSound, ref _lastBossMagicAudioClipIndex, shouldInterruptWithState);
+                return;
+            }
+
+            PlayAudioCue(Config.MagicAttackSound, GetMagicAttackAudioVariationIndex(), shouldInterruptWithState);
+        }
+
+        private int GetRegularRangedVariationCount()
+        {
+            return Config.RangedProjectileVisualPrefabs.Count;
+        }
+
+        private int GetMagicAttackAudioVariationIndex()
+        {
+            if (Config.BehaviourType == EnemyBehaviourType.Boss)
+            {
+                return Mathf.Max(0, _selectedBossElementIndex);
+            }
+
+            if (IsUsingRangedAttack())
+            {
+                return Mathf.Max(0, _selectedRegularVariationIndex);
+            }
+
+            return 0;
+        }
+
+        private bool PlayAudioCue(EnemyAudioCue cue, int variationIndex, bool interruptible = false)
+        {
+            if (_effectsAudioService == null || cue.TryGetClip(variationIndex, out AudioClip clip) == false)
+            {
+                return false;
+            }
+
+            return PlayResolvedAudioCue(clip, cue.Volume, interruptible);
+        }
+
+        private bool PlayBossAttackAudioCue(EnemyAudioCue cue, ref int lastClipIndex, bool interruptible)
+        {
+            if (_effectsAudioService == null || TryGetNextNonRepeatingBossAttackClip(cue, ref lastClipIndex, out AudioClip clip) == false)
+            {
+                return false;
+            }
+
+            return PlayResolvedAudioCue(clip, cue.Volume, interruptible);
+        }
+
+        private bool TryGetNextNonRepeatingBossAttackClip(EnemyAudioCue cue, ref int lastClipIndex, out AudioClip clip)
+        {
+            clip = null;
+
+            if (cue.Clips == null || cue.Clips.Length == 0)
+            {
+                return false;
+            }
+
+            int selectedIndex = ChooseNextNonRepeatingValidClipIndex(cue.Clips, lastClipIndex);
+            if (selectedIndex < 0)
+            {
+                return false;
+            }
+
+            lastClipIndex = selectedIndex;
+            clip = cue.Clips[selectedIndex];
+            return clip != null;
+        }
+
+        private bool PlayResolvedAudioCue(AudioClip clip, float volume, bool interruptible)
+        {
+            if (_effectsAudioService == null || clip == null)
+            {
+                return false;
+            }
+
+            float clampedVolume = Mathf.Clamp01(volume);
+
+            if (interruptible && _stateAudioSource != null)
+            {
+                _stateAudioSource.Stop();
+                _stateAudioSource.clip = clip;
+                _stateAudioSource.volume = clampedVolume;
+                _stateAudioSource.Play();
+                return true;
+            }
+
+            _effectsAudioService.PlayOneShot(clip, clampedVolume);
+            return true;
+        }
+
+        private void StopStateAudio()
+        {
+            if (_stateAudioSource == null)
+            {
+                return;
+            }
+
+            _stateAudioSource.Stop();
+            _stateAudioSource.clip = null;
+        }
+
+        private bool PlayLoopingAudioCue(EnemyAudioCue cue, int variationIndex)
+        {
+            if (_loopingStateAudioSource == null || cue.TryGetClip(variationIndex, out AudioClip clip) == false)
+            {
+                return false;
+            }
+
+            _loopingStateAudioSource.Stop();
+            _loopingStateAudioSource.clip = clip;
+            _loopingStateAudioSource.volume = Mathf.Clamp01(cue.Volume);
+            _loopingStateAudioSource.loop = true;
+            _loopingStateAudioSource.Play();
+            return true;
+        }
+
+        private static int ChooseNextNonRepeatingValidClipIndex(AudioClip[] clips, int previousIndex)
+        {
+            if (clips == null || clips.Length == 0)
+            {
+                return -1;
+            }
+
+            int validCount = 0;
+            for (int i = 0; i < clips.Length; i++)
+            {
+                if (clips[i] != null)
+                {
+                    validCount++;
+                }
+            }
+
+            if (validCount == 0)
+            {
+                return -1;
+            }
+
+            if (validCount == 1)
+            {
+                for (int i = 0; i < clips.Length; i++)
+                {
+                    if (clips[i] != null)
+                    {
+                        return i;
+                    }
+                }
+
+                return -1;
+            }
+
+            int normalizedPreviousIndex = previousIndex >= 0
+                && previousIndex < clips.Length
+                && clips[previousIndex] != null
+                ? previousIndex
+                : -1;
+
+            int candidateOrdinal = Random.Range(0, validCount - (normalizedPreviousIndex >= 0 ? 1 : 0));
+            for (int i = 0; i < clips.Length; i++)
+            {
+                if (clips[i] == null || i == normalizedPreviousIndex)
+                {
+                    continue;
+                }
+
+                if (candidateOrdinal == 0)
+                {
+                    return i;
+                }
+
+                candidateOrdinal--;
+            }
+
+            return -1;
+        }
+
+        private void StopLoopingStateAudio()
+        {
+            if (_loopingStateAudioSource == null)
+            {
+                return;
+            }
+
+            _loopingStateAudioSource.Stop();
+            _loopingStateAudioSource.loop = false;
+            _loopingStateAudioSource.clip = null;
         }
     }
 }

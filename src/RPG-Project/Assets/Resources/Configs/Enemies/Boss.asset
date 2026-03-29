@@ -15,6 +15,7 @@ MonoBehaviour:
   Id: 3
   Type: 0
   BehaviourType: 1
+  EnemyPrefab: {fileID: 705080622740557378, guid: 46a70b7256c7bc0469c12057c9aa3005, type: 3}
   MaxHealth: 500
   Damage: 15
   FleeHealthThreshold: 0.2
@@ -27,7 +28,7 @@ MonoBehaviour:
   ChaseSpeedMultiplier: 1
   FleeSpeedMultiplier: 1.2
   EnragedSpeedMultiplier: 1.15
-  AttackRange: 6
+  AttackRange: 4.4
   StrongAttackRange: 8
   AttackCooldown: 3
   StrongAttackCooldown: 10
@@ -37,27 +38,63 @@ MonoBehaviour:
   EnragedDamageMultiplier: 1.25
   RecoverDuration: 1
   DefendDamageTakenMultiplier: 0.35
-  ProjectilePrefab: {fileID: 0}
-  ProjectileSpeed: 18
-  SustainedAttackEffectPrefab: {fileID: 1725317912486240, guid: ae089c2fab473984888bd68dd226f822, type: 3}
-  SustainedAttackProjectilePrefab: {fileID: 1725317912486240, guid: ae089c2fab473984888bd68dd226f822, type: 3}
-  SustainedAttackProjectileRotationOffset: {x: -90, y: 0, z: 0}
+  ProjectileSpeed: 16
   SustainedAttackProjectileLifetime: 0.75
   StrongAttackDeliveryType: 3
   StrongAttackProjectileCount: 3
   StrongAttackProjectileSpreadAngle: 12
   StrongAttackProjectileSpeedMultiplier: 1.1
   StrongAttackEffectRadius: 3
-  StrongAttackDamageTickInterval: 0.2
+  StrongAttackDamageTickInterval: 0.17
   AirAttackRange: 16
   AirAttackCooldown: 25
   AirAttackDamageMultiplier: 1
   AirAttackEffectRadius: 3.5
   AirAttackDamageTickInterval: 0.2
+  MeleeWeaponEffectPrefabs: []
+  RangedProjectileVisualPrefabs: []
+  BossElementVariations:
+  - MeleeWeaponEffectPrefab: {fileID: 0}
+    SustainedAttackEffectPrefab: {fileID: 1725317912486240, guid: ae089c2fab473984888bd68dd226f822, type: 3}
+    SustainedAttackProjectilePrefab: {fileID: 1725317912486240, guid: ae089c2fab473984888bd68dd226f822, type: 3}
+    SustainedAttackProjectileRotationOffset: {x: -90, y: 0, z: 0}
+  - MeleeWeaponEffectPrefab: {fileID: 0}
+    SustainedAttackEffectPrefab: {fileID: 1518366863219760, guid: e09b4db8c34968c47ae0efec7377431b, type: 3}
+    SustainedAttackProjectilePrefab: {fileID: 1518366863219760, guid: e09b4db8c34968c47ae0efec7377431b, type: 3}
+    SustainedAttackProjectileRotationOffset: {x: -90, y: 0, z: 0}
+  - MeleeWeaponEffectPrefab: {fileID: 0}
+    SustainedAttackEffectPrefab: {fileID: 1900756431413560, guid: 5de8ea22512863b4eb664773b279ec77, type: 3}
+    SustainedAttackProjectilePrefab: {fileID: 1900756431413560, guid: 5de8ea22512863b4eb664773b279ec77, type: 3}
+    SustainedAttackProjectileRotationOffset: {x: -90, y: 0, z: 0}
+  - MeleeWeaponEffectPrefab: {fileID: 0}
+    SustainedAttackEffectPrefab: {fileID: 1975959190090480, guid: 6ddaeadfa62dca24f99dcae876993b52, type: 3}
+    SustainedAttackProjectilePrefab: {fileID: 1975959190090480, guid: 6ddaeadfa62dca24f99dcae876993b52, type: 3}
+    SustainedAttackProjectileRotationOffset: {x: -90, y: 0, z: 0}
+  MeleeAttackSound:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: c28c687f3ea410849a7785c3bf307920, type: 3}
+  MagicAttackSound:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: 7df0e7c64bc11954e85d81ebaeaa20f5, type: 3}
+    - {fileID: 8300000, guid: aa78eab5b31efde45b7bfb298e8e40a8, type: 3}
+  HitSound:
+    Volume: 0.5
+    Clips:
+    - {fileID: 8300000, guid: f9b0427cbca64a14f80220f634932dfb, type: 3}
+  AggressionSound:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: 653f5fa15c2cfa14c882d539508905d7, type: 3}
+  AirAttackLoopSound:
+    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: c7966f3faa1059d43ae2aea52c6c32f2, type: 3}
   AggressionAnimationDuration: 1.2
-  AggressionPostActionDelay: 2
+  AggressionPostActionDelay: 0.5
   AttackAnimationDuration: 1
   StrongAttackAnimationDuration: 2.2
   EnrageAnimationDuration: 1.4
-  EnragePostActionDelay: 2
+  EnragePostActionDelay: 0.5
   AirAttackAnimationDuration: 8

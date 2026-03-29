@@ -5,8 +5,5 @@ namespace Infrastructure.Services.Audio
         void PlayPlayerMeleeAttack();
         void PlayPlayerShot();
         void PlayPlayerHit();
-        void PlayEnemyMeleeAttack();
-        void PlayEnemyMagicAttack();
-        void PlayEnemyHit();
     }
 }
