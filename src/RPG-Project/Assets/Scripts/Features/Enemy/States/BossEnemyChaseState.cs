@@ -1,5 +1,8 @@
 namespace Features.Enemy.States
 {
+    /// <summary>
+    /// Основное боевое состояние босса с выбором дальнейшей атаки.
+    /// </summary>
     public sealed class BossEnemyChaseState : EnemyStateBase
     {
         public BossEnemyChaseState(EnemyAI enemy, EnemyStateMachine stateMachine) : base(enemy, stateMachine)

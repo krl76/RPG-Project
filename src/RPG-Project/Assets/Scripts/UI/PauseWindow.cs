@@ -8,6 +8,9 @@ using Zenject;
 
 namespace UI
 {
+    /// <summary>
+    /// Окно паузы с управлением текущей игровой сессией.
+    /// </summary>
     public sealed class PauseWindow : WindowBase, IPauseView
     {
         public override WindowID Id => WindowID.Pause;

@@ -2,6 +2,9 @@ using System;
 
 namespace UI.MVC.Views
 {
+    /// <summary>
+    /// Контракт окна паузы с командами сохранения, загрузки и выхода.
+    /// </summary>
     public interface IPauseView
     {
         event Action ResumeRequested;

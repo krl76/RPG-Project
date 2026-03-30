@@ -1,5 +1,8 @@
 namespace Features.Enemy.States
 {
+    /// <summary>
+    /// Состояние воздушной атаки босса.
+    /// </summary>
     public sealed class BossEnemyAirAttackState : EnemyStateBase
     {
         public BossEnemyAirAttackState(EnemyAI enemy, EnemyStateMachine stateMachine) : base(enemy, stateMachine)

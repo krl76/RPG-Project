@@ -1,5 +1,8 @@
 namespace Features.Enemy
 {
+    /// <summary>
+    /// Типы действий врага, используемые в логике состояний и анимаций.
+    /// </summary>
     public enum EnemyActionType
     {
         None = 0,

@@ -6,18 +6,27 @@ using UnityEditor;
 
 namespace Data.Configs
 {
+    /// <summary>
+    /// Базовый тип атаки врага.
+    /// </summary>
     public enum EnemyType
     {
         Melee,
         Ranged
     }
 
+    /// <summary>
+    /// Роль врага в боевой логике.
+    /// </summary>
     public enum EnemyBehaviourType
     {
         Regular,
         Boss
     }
 
+    /// <summary>
+    /// Способ доставки урона для усиленной атаки.
+    /// </summary>
     public enum EnemyAttackDeliveryType
     {
         Auto,
@@ -27,6 +36,9 @@ namespace Data.Configs
     }
 
     [System.Serializable]
+    /// <summary>
+    /// Набор визуалов и эффектов для элементальной вариации босса.
+    /// </summary>
     public sealed class BossElementVariation
     {
         public GameObject MeleeWeaponEffectPrefab;
@@ -36,6 +48,9 @@ namespace Data.Configs
     }
 
     [System.Serializable]
+    /// <summary>
+    /// Набор аудиоклипов врага с общей громкостью.
+    /// </summary>
     public struct EnemyAudioCue
     {
         [Range(0f, 1f)] public float Volume;
@@ -60,6 +75,9 @@ namespace Data.Configs
     }
 
     [CreateAssetMenu(fileName = "NewEnemyConfig", menuName = "Configs/Enemy Config")]
+    /// <summary>
+    /// Конфиг с параметрами, эффектами и поведением врага.
+    /// </summary>
     public class EnemyConfig : ScriptableObject
     {
         [Header("General")]
@@ -67,6 +85,7 @@ namespace Data.Configs
         public EnemyType Type;
         public EnemyBehaviourType BehaviourType = EnemyBehaviourType.Regular;
         public GameObject EnemyPrefab;
+        [Min(0)] public int ScoreReward = 1;
 
         [Header("Stats")]
         [Min(1)] public float MaxHealth = 100f;

@@ -4,6 +4,9 @@ using UnityEngine.Rendering;
 namespace Features.Combat
 {
     [RequireComponent(typeof(Rigidbody))]
+    /// <summary>
+    /// Простой боевой снаряд, который летит вперёд и наносит урон при столкновении.
+    /// </summary>
     public class MagicProjectile : MonoBehaviour
     {
         private const float FallbackCollisionRadius = 0.05f;

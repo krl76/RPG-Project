@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Features.Enemy
 {
+    /// <summary>
+    /// Эффект периодического урона по области для атак врага.
+    /// </summary>
     public sealed class EnemyPersistentDamageEffect : MonoBehaviour
     {
         private float _damagePerTick;

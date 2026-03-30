@@ -1,5 +1,8 @@
 ﻿namespace Infrastructure.Services.UI
 {
+    /// <summary>
+    /// Идентификаторы окон пользовательского интерфейса.
+    /// </summary>
     public enum WindowID
     {
         None = -1,

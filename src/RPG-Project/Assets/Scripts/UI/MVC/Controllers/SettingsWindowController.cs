@@ -5,6 +5,9 @@ using UI.MVC.Views;
 
 namespace UI.MVC.Controllers
 {
+    /// <summary>
+    /// Контроллер окна настроек и аудио-параметров.
+    /// </summary>
     public sealed class SettingsWindowController
     {
         private readonly IWindowService _windowService;

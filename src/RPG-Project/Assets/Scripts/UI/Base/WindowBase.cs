@@ -5,6 +5,9 @@ using Zenject;
 namespace UI.Base
 {
     [RequireComponent(typeof(CanvasGroup))]
+    /// <summary>
+    /// Базовый класс для всех UI-окон проекта.
+    /// </summary>
     public abstract class WindowBase : MonoBehaviour
     {
         public abstract WindowID Id { get; }

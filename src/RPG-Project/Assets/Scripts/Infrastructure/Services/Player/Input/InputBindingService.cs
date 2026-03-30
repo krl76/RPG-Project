@@ -6,6 +6,9 @@ using UnityEngine.InputSystem.Utilities;
 
 namespace Infrastructure.Services.Player.Input
 {
+    /// <summary>
+    /// Сервис отображения и интерактивного переназначения биндов ввода.
+    /// </summary>
     public sealed class InputBindingService : IInputBindingService
     {
         private const string BindingOverridesKey = "input.binding.overrides";

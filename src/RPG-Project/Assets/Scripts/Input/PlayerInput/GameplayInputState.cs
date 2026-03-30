@@ -1,5 +1,8 @@
 namespace prototype_Roma.Scripts
 {
+    /// <summary>
+    /// Состояние ввода, в котором игровые действия игрока активны.
+    /// </summary>
     public class GameplayInputState : IInputState
     {
         private readonly PlayerInput _input;

@@ -10,6 +10,9 @@ using Zenject;
 
 namespace UI
 {
+    /// <summary>
+    /// Окно пользовательских настроек игры.
+    /// </summary>
     public sealed class SettingsWindow : WindowBase, ISettingsView
     {
         public override WindowID Id => WindowID.Settings;

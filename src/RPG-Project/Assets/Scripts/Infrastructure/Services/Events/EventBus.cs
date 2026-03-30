@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Infrastructure.Services.Events
 {
+    /// <summary>
+    /// Глобальная шина событий для подписчиков игрового процесса.
+    /// </summary>
     public static class EventBus
     {
         private static readonly ConcurrentDictionary<Type, SubscribersList<IGlobalSubscriber>> Subscribers = new();

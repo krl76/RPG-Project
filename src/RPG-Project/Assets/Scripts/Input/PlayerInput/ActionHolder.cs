@@ -3,6 +3,9 @@ using UnityEngine.InputSystem;
 
 namespace prototype_Roma.Scripts
 {
+    /// <summary>
+    /// Хранит и пробрасывает события input action в игровые сервисы.
+    /// </summary>
     public class ActionHolder
     {
         public event Action Jump;

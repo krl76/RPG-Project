@@ -12,6 +12,9 @@ using Zenject;
 
 namespace Features.Player
 {
+    /// <summary>
+    /// Отвечает за перемещение и уклонение игрока.
+    /// </summary>
     public class PlayerMovement : MonoBehaviour
     {
         public bool IsFalling = false;

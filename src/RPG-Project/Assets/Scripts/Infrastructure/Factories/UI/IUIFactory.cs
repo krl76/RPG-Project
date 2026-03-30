@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Infrastructure.Factories.UI
 {
+    /// <summary>
+    /// Контракт фабрики экранов UI.
+    /// </summary>
     public interface IUIFactory
     {
         GameObject CreateScreen(GameObject prefab, WindowID windowId);

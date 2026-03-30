@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Infrastructure.Repositories.Save
 {
+    /// <summary>
+    /// Репозиторий сохранений в формате JSON.
+    /// </summary>
     public sealed class JsonGameSaveRepository : IGameSaveRepository
     {
         private const string SaveFileName = "savegame.json";

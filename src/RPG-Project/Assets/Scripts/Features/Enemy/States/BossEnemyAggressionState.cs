@@ -1,5 +1,8 @@
 namespace Features.Enemy.States
 {
+    /// <summary>
+    /// Вступительное состояние босса перед переходом к преследованию.
+    /// </summary>
     public sealed class BossEnemyAggressionState : EnemyStateBase
     {
         public BossEnemyAggressionState(EnemyAI enemy, EnemyStateMachine stateMachine) : base(enemy, stateMachine)

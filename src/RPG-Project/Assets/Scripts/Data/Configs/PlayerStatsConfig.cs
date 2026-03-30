@@ -3,6 +3,9 @@ using UnityEngine;
 namespace Data.Configs
 {
     [CreateAssetMenu(fileName = "PlayerStatsConfig", menuName = "Configs/Players stats config")]
+    /// <summary>
+    /// Конфиг базовых характеристик, атаки и движения игрока.
+    /// </summary>
     public class PlayerStatsConfig : ScriptableObject
     {
         [Header("Base")]

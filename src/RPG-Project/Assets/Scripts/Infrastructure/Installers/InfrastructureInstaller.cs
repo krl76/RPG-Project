@@ -12,6 +12,7 @@ using Infrastructure.Repositories.Save;
 using Infrastructure.Services.Audio;
 using Infrastructure.Services.Camera;
 using Infrastructure.Services.Enemy;
+using Infrastructure.Services.Gameplay;
 using Infrastructure.Services.Player;
 using Infrastructure.Services.Player.Animator;
 using Infrastructure.Services.Player.Input;
@@ -24,6 +25,9 @@ using Zenject;
 
 namespace Infrastructure.Installers
 {
+    /// <summary>
+    /// Регистрирует основные зависимости проекта в Zenject.
+    /// </summary>
     public class InfrastructureInstaller : MonoInstaller
     {
         [UnityEngine.SerializeField] private AudioMixer _audioMixer;
@@ -69,6 +73,7 @@ namespace Infrastructure.Installers
             Container.Bind<IAudioService>().To<AudioService>().AsSingle().WithArguments(_audioMixer);
             Container.Bind<IEffectsAudioService>().To<EffectsAudioService>().AsSingle().WithArguments(_audioMixer);
             Container.Bind<ICombatAudioService>().To<CombatAudioService>().AsSingle();
+            Container.Bind<IGameplayAudioService>().To<GameplayAudioService>().AsSingle().WithArguments(_audioMixer);
         }
 
         private void BindGameplayServices()
@@ -80,6 +85,7 @@ namespace Infrastructure.Installers
             Container.Bind<IPlayerAnimatorService>().To<PlayerAnimatorService>().AsSingle();
             Container.Bind<IEnemyService>().To<EnemyService>().AsSingle();
             Container.Bind<IEnemyModeService>().To<EnemyModeService>().AsSingle();
+            Container.Bind<IGameplayProgressService>().To<GameplayProgressService>().AsSingle();
         }
 
         private void BindUIServices()

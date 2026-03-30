@@ -1,5 +1,8 @@
 namespace Features.Enemy.States
 {
+    /// <summary>
+    /// Универсальное состояние выполнения обычной или сильной атаки врага.
+    /// </summary>
     public sealed class EnemyAttackState : EnemyStateBase
     {
         private readonly EnemyActionType _actionType;

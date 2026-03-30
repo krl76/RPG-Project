@@ -16,6 +16,7 @@ MonoBehaviour:
   Type: 0
   BehaviourType: 1
   EnemyPrefab: {fileID: 705080622740557378, guid: 46a70b7256c7bc0469c12057c9aa3005, type: 3}
+  ScoreReward: 50
   MaxHealth: 500
   Damage: 15
   FleeHealthThreshold: 0.2
@@ -37,7 +38,7 @@ MonoBehaviour:
   StrongAttackHitRadiusMultiplier: 2
   EnragedDamageMultiplier: 1.25
   RecoverDuration: 1
-  DefendDamageTakenMultiplier: 0.35
+  DefendDamageTakenMultiplier: 0.5
   ProjectileSpeed: 16
   SustainedAttackProjectileLifetime: 0.75
   StrongAttackDeliveryType: 3

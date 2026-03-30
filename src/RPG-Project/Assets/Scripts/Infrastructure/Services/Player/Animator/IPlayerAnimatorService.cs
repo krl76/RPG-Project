@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Infrastructure.Services.Player.Animator
 {
+    /// <summary>
+    /// Контракт управления анимациями и событиями аниматора игрока.
+    /// </summary>
     public interface IPlayerAnimatorService
     {
         public bool IsInitilized { get; set; }

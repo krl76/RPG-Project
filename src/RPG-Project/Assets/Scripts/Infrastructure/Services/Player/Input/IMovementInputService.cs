@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace Infrastructure.Services.Player.Input
 {
+    /// <summary>
+    /// Контракт обработки перемещения и прыжка игрока.
+    /// </summary>
     public interface IMovementInputService
     {
         public bool CanMove { get; set; }

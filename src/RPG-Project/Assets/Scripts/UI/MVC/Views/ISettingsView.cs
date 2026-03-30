@@ -3,6 +3,9 @@ using Infrastructure.Services.Player.Input;
 
 namespace UI.MVC.Views
 {
+    /// <summary>
+    /// Контракт окна настроек звука и переназначения клавиш.
+    /// </summary>
     public interface ISettingsView
     {
         event Action CloseRequested;

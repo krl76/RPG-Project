@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Infrastructure.Services.UI
 {
+    /// <summary>
+    /// Открывает, закрывает и выдаёт UI-окна по идентификатору.
+    /// </summary>
     public class WindowService : IWindowService
     {
         private readonly IUIFactory _uiFactory;

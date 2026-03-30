@@ -7,6 +7,7 @@ using Infrastructure.Factories.Objects;
 using Infrastructure.Services.Audio;
 using Infrastructure.Services.Enemy;
 using Infrastructure.Services.Player;
+using Infrastructure.Services.Gameplay;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -15,13 +16,16 @@ using Zenject;
 namespace Features.Enemy
 {
     [RequireComponent(typeof(NavMeshAgent), typeof(Animator), typeof(EnemyAnimation))]
+    /// <summary>
+    /// Основной контроллер логики, состояний и боя врага.
+    /// </summary>
     public class EnemyAI : MonoBehaviour, IDamageable
     {
         private static readonly Dictionary<string, int> LastVariationIndexByKey = new();
 
         public bool IsAlive => _currentHealth > 0f;
         public float CurrentHealth => _currentHealth;
-        public string SaveId => SceneObjectSaveId.Build(transform);
+        public string SaveId => string.IsNullOrWhiteSpace(_saveId) ? SceneObjectSaveId.Build(transform) : _saveId;
         public EnemyStateId CurrentStateId => _stateMachine?.CurrentStateId ?? EnemyStateId.None;
         [field: SerializeField] public EnemyConfig Config { get; private set; }
 
@@ -50,6 +54,7 @@ namespace Features.Enemy
         private int _selectedBossElementIndex = -1;
         private int _lastBossMeleeAudioClipIndex = -1;
         private int _lastBossMagicAudioClipIndex = -1;
+        private string _saveId;
 
         private Transform _playerTransform;
         private IDamageable _playerDamageable;
@@ -69,6 +74,7 @@ namespace Features.Enemy
         private IEnemyModeService _enemyModeService;
         private IPlayerService _playerService;
         private IEffectsAudioService _effectsAudioService;
+        private IGameplayProgressService _gameplayProgressService;
 
         [Inject]
         private void Construct(
@@ -76,13 +82,15 @@ namespace Features.Enemy
             IGameObjectFactory gameObjectFactory,
             IEnemyService enemyService,
             IEnemyModeService enemyModeService,
-            IEffectsAudioService effectsAudioService)
+            IEffectsAudioService effectsAudioService,
+            IGameplayProgressService gameplayProgressService)
         {
             _playerService = playerService;
             _gameObjectFactory = gameObjectFactory;
             _enemyService = enemyService;
             _enemyModeService = enemyModeService;
             _effectsAudioService = effectsAudioService;
+            _gameplayProgressService = gameplayProgressService;
         }
 
         public bool IsActionInProgress => _currentAction != EnemyActionType.None;
@@ -114,14 +122,13 @@ namespace Features.Enemy
 
             BuildStateMachine();
             _stateMachine.Enter(EnemyStateId.Rest);
-
-            _enemyService.Register(this);
         }
 
         private void Start()
         {
             RefreshPlayerReferences();
             PublishHealth();
+            _enemyService.Register(this);
         }
 
         private void Update()
@@ -500,6 +507,7 @@ namespace Features.Enemy
             new EnemySaveData
             {
                 Id = SaveId,
+                ConfigId = Config != null ? Config.Id : 0,
                 IsAlive = IsAlive,
                 IsProvoked = _isProvoked,
                 IsEnraged = _isEnraged,
@@ -521,6 +529,7 @@ namespace Features.Enemy
                 return;
             }
 
+            SetSaveId(data.Id);
             SetPositionAndRotation(data.Position.ToVector3(), Quaternion.Euler(data.Rotation.ToVector3()));
             _currentHealth = Mathf.Clamp(data.CurrentHealth, 0f, Config.MaxHealth);
             _isProvoked = data.IsProvoked;
@@ -538,6 +547,11 @@ namespace Features.Enemy
             EnableAllColliders(true);
             ResetActionState();
             EnterRuntimeStateAfterLoad();
+        }
+
+        public void SetSaveId(string saveId)
+        {
+            _saveId = string.IsNullOrWhiteSpace(saveId) ? _saveId : saveId;
         }
 
         private void BuildStateMachine()
@@ -609,6 +623,7 @@ namespace Features.Enemy
             StopMovement();
             _enemyAnimation.PlayDeath();
             EnableAllColliders(false);
+            _gameplayProgressService?.RegisterEnemyKill(Config);
             _enemyService.MarkDead(this);
             Destroy(gameObject, 3f);
         }

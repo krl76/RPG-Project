@@ -3,6 +3,9 @@ using Zenject;
 
 namespace Core.StateMachine
 {
+    /// <summary>
+    /// Управляет переключением состояний игрового flow.
+    /// </summary>
     public sealed class GameStateMachine : IGameStateMachine
     {
         private readonly DiContainer _container;

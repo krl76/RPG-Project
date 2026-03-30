@@ -2,6 +2,9 @@ using System;
 
 namespace Infrastructure.Services.Audio
 {
+    /// <summary>
+    /// Контракт управления глобальными уровнями громкости.
+    /// </summary>
     public interface IAudioService
     {
         event Action VolumesChanged;

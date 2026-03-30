@@ -3,9 +3,13 @@ using System;
 namespace Core.Gameplay.Save.Data
 {
     [Serializable]
+    /// <summary>
+    /// Снимок состояния врага для сохранения и восстановления.
+    /// </summary>
     public sealed class EnemySaveData
     {
         public string Id;
+        public int ConfigId;
         public bool IsAlive;
         public bool IsProvoked;
         public bool IsEnraged;

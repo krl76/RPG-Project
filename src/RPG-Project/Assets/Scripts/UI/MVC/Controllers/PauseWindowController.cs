@@ -3,6 +3,9 @@ using UI.MVC.Views;
 
 namespace UI.MVC.Controllers
 {
+    /// <summary>
+    /// Контроллер окна паузы и связанных действий.
+    /// </summary>
     public sealed class PauseWindowController
     {
         private readonly GameplayPauseController _gameplayPauseController;

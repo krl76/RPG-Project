@@ -2,6 +2,9 @@ using prototype_Roma.Scripts;
 
 namespace Input.PlayerInput
 {
+    /// <summary>
+    /// Координирует состояния ввода игрока.
+    /// </summary>
     public class InputManager
     {
         public readonly ActionHolder Actions;

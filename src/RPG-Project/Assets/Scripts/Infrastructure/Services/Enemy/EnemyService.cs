@@ -9,6 +9,9 @@ using UnityEngine.AI;
 
 namespace Infrastructure.Services.Enemy
 {
+    /// <summary>
+    /// Создаёт врагов, хранит их runtime-состояние и данные для save/load.
+    /// </summary>
     public class EnemyService : IEnemyService
     {
         private readonly IGameObjectFactory _gameObjectFactory;
@@ -22,7 +25,7 @@ namespace Infrastructure.Services.Enemy
 
         public IReadOnlyList<EnemyAI> ActiveEnemies => _enemies;
 
-        public EnemyAI Spawn(EnemyConfig config, Vector3 position, Quaternion rotation, Transform parent = null)
+        public EnemyAI Spawn(EnemyConfig config, Vector3 position, Quaternion rotation, Transform parent = null, string saveId = null)
         {
             if (TryResolvePrefab(config, out GameObject enemyPrefab) == false)
             {
@@ -33,6 +36,7 @@ namespace Infrastructure.Services.Enemy
             enemyObject.transform.SetPositionAndRotation(position, rotation);
             if (enemyObject.TryGetComponent(out EnemyAI enemyAI))
             {
+                enemyAI.SetSaveId(saveId);
                 return enemyAI;
             }
 
@@ -107,6 +111,16 @@ namespace Infrastructure.Services.Enemy
             _trackedStates[enemy.SaveId] = snapshot;
         }
 
+        public void RestoreSavedState(EnemySaveData enemySaveData)
+        {
+            if (enemySaveData == null || string.IsNullOrWhiteSpace(enemySaveData.Id))
+            {
+                return;
+            }
+
+            _trackedStates[enemySaveData.Id] = Clone(enemySaveData);
+        }
+
         public IReadOnlyList<EnemySaveData> CaptureSaveData()
         {
             var combinedState = new Dictionary<string, EnemySaveData>(_trackedStates);
@@ -141,5 +155,24 @@ namespace Infrastructure.Services.Enemy
             Debug.LogWarning($"[EnemyService] Enemy prefab is not assigned for config '{config?.name ?? "null"}'.");
             return false;
         }
+
+        private static EnemySaveData Clone(EnemySaveData data) =>
+            new EnemySaveData
+            {
+                Id = data.Id,
+                ConfigId = data.ConfigId,
+                IsAlive = data.IsAlive,
+                IsProvoked = data.IsProvoked,
+                IsEnraged = data.IsEnraged,
+                HasSelectedRegularVariation = data.HasSelectedRegularVariation,
+                SelectedRegularVariationIndex = data.SelectedRegularVariationIndex,
+                HasSelectedBossElement = data.HasSelectedBossElement,
+                SelectedBossElementIndex = data.SelectedBossElementIndex,
+                CurrentHealth = data.CurrentHealth,
+                MaxHealth = data.MaxHealth,
+                RuntimeStateId = data.RuntimeStateId,
+                Position = data.Position,
+                Rotation = data.Rotation
+            };
     }
 }

@@ -1,5 +1,8 @@
 namespace Features.Enemy
 {
+    /// <summary>
+    /// Идентификаторы состояний конечного автомата врага.
+    /// </summary>
     public enum EnemyStateId
     {
         None = 0,

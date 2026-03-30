@@ -5,6 +5,9 @@ using Zenject;
 namespace Features.Player
 {
     [RequireComponent(typeof(Animator))]
+    /// <summary>
+    /// Принимает animation events игрока и передаёт их в animator service.
+    /// </summary>
     public class PlayerEventReader : MonoBehaviour
     {
         private IPlayerAnimatorService _playerAnimatorService;

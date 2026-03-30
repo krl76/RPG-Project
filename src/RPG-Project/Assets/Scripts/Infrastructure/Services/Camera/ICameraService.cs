@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Infrastructure.Services.Camera
 {
+    /// <summary>
+    /// Контракт управления игровой камерой и её углами.
+    /// </summary>
     public interface ICameraService
     {
         event Action CameraRotationChanged;

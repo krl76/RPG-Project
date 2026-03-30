@@ -12,6 +12,9 @@ using Zenject;
 
 namespace Features.Player
 {
+    /// <summary>
+    /// Хранит здоровье игрока и обрабатывает получение урона.
+    /// </summary>
     public class PlayerHealth : MonoBehaviour, IDamageable
     {
         public bool IsAlive => _currentHealth > 0;

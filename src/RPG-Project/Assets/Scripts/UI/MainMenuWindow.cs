@@ -8,6 +8,9 @@ using Zenject;
 
 namespace UI
 {
+    /// <summary>
+    /// Окно главного меню с основными действиями игрока.
+    /// </summary>
     public sealed class MainMenuWindow : WindowBase, IMainMenuView
     {
         public override WindowID Id => WindowID.MainMenu;

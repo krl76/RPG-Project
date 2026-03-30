@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Infrastructure.Services.Player.Animator
 {
+    /// <summary>
+    /// Сервис-обёртка над аниматором игрока.
+    /// </summary>
     public class PlayerAnimatorService : IPlayerAnimatorService
     {
         #region Public Events

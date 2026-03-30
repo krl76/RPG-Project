@@ -5,6 +5,9 @@ using Zenject;
 
 namespace Features.Player
 {
+    /// <summary>
+    /// Управляет хватом оружия игрока и позой при прицеливании.
+    /// </summary>
     public class PlayerGrab : MonoBehaviour
     {
         [SerializeField] private Transform _pistol;

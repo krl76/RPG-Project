@@ -6,6 +6,9 @@ using Zenject;
 
 namespace Features.Camera
 {
+    /// <summary>
+    /// Считывает ввод мыши и поворачивает игровую камеру.
+    /// </summary>
     public class CameraRotationBehaviour : MonoBehaviour
     {
         [SerializeField] private float _sensitivity = 20f;
