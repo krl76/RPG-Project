@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace UI
 {
+    /// <summary>
+    /// Мировой индикатор здоровья с разворотом к камере и анимацией изменения.
+    /// </summary>
     public class WorldHealthBar : MonoBehaviour, IHealthFeedback
     {
         private const float PunchDuration = 0.5f;

@@ -5,6 +5,9 @@ using Zenject;
 
 namespace Infrastructure.Factories.Objects
 {
+    /// <summary>
+    /// Фабрика создания и отслеживания runtime-объектов.
+    /// </summary>
     public class GameObjectFactory : IGameObjectFactory
     {
         private readonly DiContainer _globalContainer;

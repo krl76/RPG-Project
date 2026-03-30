@@ -317,6 +317,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.WorldHealthBar
   _healthSlider: {fileID: 1626584796476565771}
+  _minPunchScale: 0.9
 --- !u!1 &5947519598662098768
 GameObject:
   m_ObjectHideFlags: 0

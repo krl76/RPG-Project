@@ -1,22 +1,31 @@
 using Features.Player;
 using Infrastructure.Services.Events;
+using Infrastructure.Services.Gameplay;
 using Infrastructure.Services.Player;
 using Infrastructure.Services.Player.Input;
 using UI.MVC.Views;
 
 namespace UI.MVC.Controllers
 {
-    public sealed class HUDWindowController : IPlayerHealthSubscriber, IPlayerMagicSubscriber
+    /// <summary>
+    /// Контроллер HUD, синхронизирующий модель игрока и отображение.
+    /// </summary>
+    public sealed class HUDWindowController : IPlayerHealthSubscriber, IPlayerMagicSubscriber, IScoreSubscriber
     {
         private readonly IPlayerService _playerService;
         private readonly IFightInputService _fightInputService;
+        private readonly IGameplayProgressService _gameplayProgressService;
 
         private IHUDView _view;
 
-        public HUDWindowController(IPlayerService playerService, IFightInputService fightInputService)
+        public HUDWindowController(
+            IPlayerService playerService,
+            IFightInputService fightInputService,
+            IGameplayProgressService gameplayProgressService)
         {
             _playerService = playerService;
             _fightInputService = fightInputService;
+            _gameplayProgressService = gameplayProgressService;
         }
 
         public void Attach(IHUDView view)
@@ -58,6 +67,11 @@ namespace UI.MVC.Controllers
             _view?.CompleteMagicCooldown();
         }
 
+        public void OnScoreChanged(int currentScore, bool animated)
+        {
+            _view?.SetScore(currentScore, animated);
+        }
+
         private void SyncView()
         {
             if (_view == null)
@@ -84,6 +98,8 @@ namespace UI.MVC.Controllers
             {
                 _view.CompleteMagicCooldown();
             }
+
+            _view.SetScore(_gameplayProgressService.CurrentScore, animated: false);
         }
     }
 }

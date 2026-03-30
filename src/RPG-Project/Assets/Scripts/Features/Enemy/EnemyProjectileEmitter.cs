@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Features.Enemy
 {
+    /// <summary>
+    /// Выпускает пачки снарядов или визуальных прожектайлов по цели.
+    /// </summary>
     public sealed class EnemyProjectileEmitter : MonoBehaviour
     {
         private IGameObjectFactory _gameObjectFactory;

@@ -1,5 +1,8 @@
 namespace Features.Enemy.States
 {
+    /// <summary>
+    /// Базовый класс состояний врага с доступом к `EnemyAI` и state machine.
+    /// </summary>
     public abstract class EnemyStateBase : IEnemyState
     {
         protected readonly EnemyAI Enemy;

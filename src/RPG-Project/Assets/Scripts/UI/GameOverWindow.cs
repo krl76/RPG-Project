@@ -8,6 +8,9 @@ using Zenject;
 
 namespace UI
 {
+    /// <summary>
+    /// Окно завершения игры после поражения.
+    /// </summary>
     public class GameOverWindow : WindowBase, IGameOverView
     {
         public override WindowID Id => WindowID.GameOver;

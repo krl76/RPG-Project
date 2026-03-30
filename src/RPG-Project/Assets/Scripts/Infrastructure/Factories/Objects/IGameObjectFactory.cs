@@ -4,6 +4,9 @@ using Zenject;
 
 namespace Infrastructure.Factories.Objects
 {
+    /// <summary>
+    /// Контракт фабрики игровых объектов.
+    /// </summary>
     public interface IGameObjectFactory
     {
         GameObject Instantiate(GameObject prefab = null, Vector3? position = null,

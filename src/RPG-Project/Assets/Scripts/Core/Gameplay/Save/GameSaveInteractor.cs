@@ -7,12 +7,16 @@ using Features.Player;
 using Infrastructure.Repositories.Save;
 using Infrastructure.Services.Camera;
 using Infrastructure.Services.Enemy;
+using Infrastructure.Services.Gameplay;
 using Infrastructure.Services.Player;
 using Infrastructure.Services.Player.Input;
 using UnityEngine;
 
 namespace Core.Gameplay.Save
 {
+    /// <summary>
+    /// Координирует сохранение и восстановление игрового состояния.
+    /// </summary>
     public sealed class GameSaveInteractor : IGameSaveInteractor
     {
         private readonly IGameSaveRepository _gameSaveRepository;
@@ -20,6 +24,7 @@ namespace Core.Gameplay.Save
         private readonly IEnemyService _enemyService;
         private readonly ICameraService _cameraService;
         private readonly IFightInputService _fightInputService;
+        private readonly IGameplayProgressService _gameplayProgressService;
 
         private GameSaveData _pendingRestoreData;
 
@@ -28,13 +33,15 @@ namespace Core.Gameplay.Save
             IPlayerService playerService,
             IEnemyService enemyService,
             ICameraService cameraService,
-            IFightInputService fightInputService)
+            IFightInputService fightInputService,
+            IGameplayProgressService gameplayProgressService)
         {
             _gameSaveRepository = gameSaveRepository;
             _playerService = playerService;
             _enemyService = enemyService;
             _cameraService = cameraService;
             _fightInputService = fightInputService;
+            _gameplayProgressService = gameplayProgressService;
         }
 
         public bool SaveGame()
@@ -66,7 +73,8 @@ namespace Core.Gameplay.Save
                     MagicCooldownRemaining = _fightInputService.MagicCooldownRemaining,
                     MagicCooldownDuration = _fightInputService.MagicCooldownDuration
                 },
-                Enemies = _enemyService.CaptureSaveData().ToList()
+                Enemies = _enemyService.CaptureSaveData().ToList(),
+                Progress = _gameplayProgressService.CaptureSaveData()
             };
 
             _gameSaveRepository.Save(saveData);
@@ -85,6 +93,11 @@ namespace Core.Gameplay.Save
             return true;
         }
 
+        public bool HasPendingRestore() => _pendingRestoreData != null;
+
+        public IReadOnlyList<EnemySaveData> GetPendingEnemyStates() =>
+            (IReadOnlyList<EnemySaveData>)_pendingRestoreData?.Enemies ?? Array.Empty<EnemySaveData>();
+
         public void ApplyPendingGameState()
         {
             if (_pendingRestoreData == null)
@@ -93,8 +106,7 @@ namespace Core.Gameplay.Save
             }
 
             ApplyPlayerState(_pendingRestoreData.Player);
-            ApplyEnemyStates(_pendingRestoreData.Enemies);
-            _pendingRestoreData = null;
+            _gameplayProgressService.RestoreProgress(_pendingRestoreData.Progress);
         }
 
         public void ClearPendingRestore()
@@ -132,31 +144,5 @@ namespace Core.Gameplay.Save
                 playerSaveData.MagicCooldownDuration);
         }
 
-        private void ApplyEnemyStates(IEnumerable<EnemySaveData> enemySaveData)
-        {
-            if (enemySaveData == null)
-            {
-                return;
-            }
-
-            var dataById = enemySaveData
-                .Where(data => data != null && string.IsNullOrWhiteSpace(data.Id) == false)
-                .ToDictionary(data => data.Id, data => data);
-
-            foreach (EnemyAI enemy in _enemyService.ActiveEnemies)
-            {
-                if (enemy == null)
-                {
-                    continue;
-                }
-
-                if (dataById.TryGetValue(enemy.SaveId, out var saveData) == false)
-                {
-                    continue;
-                }
-
-                enemy.ApplySaveData(saveData);
-            }
-        }
     }
 }

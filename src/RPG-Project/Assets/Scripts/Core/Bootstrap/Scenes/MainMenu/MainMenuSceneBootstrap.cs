@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Core.Bootstrap.Scenes.MainMenu
 {
+    /// <summary>
+    /// Подготавливает главное меню после загрузки стартовой сцены.
+    /// </summary>
     public sealed class MainMenuSceneBootstrap
     {
         private readonly InputManager _inputManager;

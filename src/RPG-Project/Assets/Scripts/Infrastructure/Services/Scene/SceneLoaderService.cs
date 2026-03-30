@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 
 namespace Infrastructure.Services.Scene
 {
+    /// <summary>
+    /// Загружает сцены и обновляет экран загрузки.
+    /// </summary>
     public class SceneLoaderService : ISceneLoaderService
     {
         private readonly ILoadingScreenService _loadingScreenService;

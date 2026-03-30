@@ -1,5 +1,8 @@
 namespace Features.Enemy.States
 {
+    /// <summary>
+    /// Состояние преследования и атаки обычного врага.
+    /// </summary>
     public sealed class RegularEnemyAggressionState : EnemyStateBase
     {
         public RegularEnemyAggressionState(EnemyAI enemy, EnemyStateMachine stateMachine) : base(enemy, stateMachine)

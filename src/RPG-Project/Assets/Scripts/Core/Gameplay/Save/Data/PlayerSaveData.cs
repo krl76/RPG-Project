@@ -3,6 +3,9 @@ using System;
 namespace Core.Gameplay.Save.Data
 {
     [Serializable]
+    /// <summary>
+    /// Снимок состояния игрока для сохранения.
+    /// </summary>
     public sealed class PlayerSaveData
     {
         public Vector3SaveData Position;

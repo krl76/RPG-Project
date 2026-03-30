@@ -24,3 +24,11 @@ MonoBehaviour:
     Volume: 1
     Clips:
     - {fileID: 8300000, guid: c4abf6925896a7549bc9fcca6f7cc4a2, type: 3}
+  ScoreGained:
+    Volume: 0.3
+    Clips:
+    - {fileID: 8300000, guid: a334801d656f56d48bb21a46ac7bd714, type: 3}
+  VictoryMusic:
+    Volume: 0.5
+    Clips:
+    - {fileID: 8300000, guid: aa4fd59ee934a04479db332adc8e710e, type: 3}

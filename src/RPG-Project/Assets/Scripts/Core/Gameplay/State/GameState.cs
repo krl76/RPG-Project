@@ -1,5 +1,8 @@
 namespace Core.Gameplay.State
 {
+    /// <summary>
+    /// Набор основных состояний игрового цикла.
+    /// </summary>
     public enum GameState
     {
         None = 0,

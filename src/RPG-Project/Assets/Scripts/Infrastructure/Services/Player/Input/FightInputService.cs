@@ -12,6 +12,9 @@ using UnityEngine;
 
 namespace Infrastructure.Services.Player.Input
 {
+    /// <summary>
+    /// Сервис обработки атак, прицеливания и отката магии игрока.
+    /// </summary>
     public class FightInputService : IFightInputService
     {
         public float MagicCooldownRemaining =>

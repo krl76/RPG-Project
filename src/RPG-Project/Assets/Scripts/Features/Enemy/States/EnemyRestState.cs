@@ -2,6 +2,9 @@ using Data.Configs;
 
 namespace Features.Enemy.States
 {
+    /// <summary>
+    /// Состояние покоя врага до активации или возвращения в бой.
+    /// </summary>
     public sealed class EnemyRestState : EnemyStateBase
     {
         public EnemyRestState(EnemyAI enemy, EnemyStateMachine stateMachine) : base(enemy, stateMachine)

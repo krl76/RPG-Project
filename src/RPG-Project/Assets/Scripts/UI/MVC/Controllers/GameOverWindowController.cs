@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace UI.MVC.Controllers
 {
+    /// <summary>
+    /// Контроллер окна поражения с рестартом и выходом в меню.
+    /// </summary>
     public sealed class GameOverWindowController
     {
         private readonly IGameStateMachine _gameStateMachine;

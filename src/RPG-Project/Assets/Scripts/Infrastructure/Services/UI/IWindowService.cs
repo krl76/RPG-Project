@@ -2,6 +2,9 @@
 
 namespace Infrastructure.Services.UI
 {
+    /// <summary>
+    /// Контракт сервиса открытия и закрытия окон.
+    /// </summary>
     public interface IWindowService
     {
         bool IsWindowOpened(WindowID windowID);

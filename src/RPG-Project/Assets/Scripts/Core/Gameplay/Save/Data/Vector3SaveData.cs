@@ -4,6 +4,9 @@ using UnityEngine;
 namespace Core.Gameplay.Save.Data
 {
     [Serializable]
+    /// <summary>
+    /// Сериализуемое представление вектора `Vector3`.
+    /// </summary>
     public struct Vector3SaveData
     {
         public float X;

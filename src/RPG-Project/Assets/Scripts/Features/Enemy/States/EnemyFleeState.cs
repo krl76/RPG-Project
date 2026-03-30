@@ -1,5 +1,8 @@
 namespace Features.Enemy.States
 {
+    /// <summary>
+    /// Состояние отступления врага при низком здоровье.
+    /// </summary>
     public sealed class EnemyFleeState : EnemyStateBase
     {
         public EnemyFleeState(EnemyAI enemy, EnemyStateMachine stateMachine) : base(enemy, stateMachine)

@@ -3,6 +3,9 @@ using UnityEngine.Audio;
 
 namespace Infrastructure.Services.Audio
 {
+    /// <summary>
+    /// Управляет пользовательскими уровнями громкости через AudioMixer.
+    /// </summary>
     public sealed class AudioService : IAudioService
     {
         private const string MasterVolumeKey = "audio.master";

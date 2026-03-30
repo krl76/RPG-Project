@@ -1,5 +1,8 @@
 namespace Features.Enemy.States
 {
+    /// <summary>
+    /// Состояние усиления босса при переходе в enraged-фазу.
+    /// </summary>
     public sealed class BossEnemyEnrageState : EnemyStateBase
     {
         public BossEnemyEnrageState(EnemyAI enemy, EnemyStateMachine stateMachine) : base(enemy, stateMachine)

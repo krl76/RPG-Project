@@ -6,6 +6,9 @@ using Object = UnityEngine.Object;
 
 namespace Infrastructure.Services.Camera
 {
+    /// <summary>
+    /// Сервис инициализации и управления игровой камерой.
+    /// </summary>
     public class CameraService : ICameraService
     {
         public event Action CameraRotationChanged;

@@ -8,6 +8,9 @@ using Zenject;
 
 namespace Infrastructure.Providers.Configs
 {
+    /// <summary>
+    /// Загружает и предоставляет конфиги из Resources.
+    /// </summary>
     public class ConfigDataProvider : IConfigDataProvider, IInitializable
     {
         private GameConfig _gameConfig;

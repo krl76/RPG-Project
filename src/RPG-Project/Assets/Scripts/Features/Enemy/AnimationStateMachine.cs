@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Features.Enemy
 {
+    /// <summary>
+    /// Поведение аниматора, которое пробрасывает завершение состояний анимации.
+    /// </summary>
     public class AnimationStateMachine : StateMachineBehaviour
     {
         public string StateName;

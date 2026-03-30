@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace Infrastructure.Factories.UI
 {
+    /// <summary>
+    /// Фабрика создания, хранения и уничтожения окон UI.
+    /// </summary>
     public class UIFactory : IUIFactory
     {
         private readonly IGameObjectFactory _gameObjectFactory;

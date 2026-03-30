@@ -16,8 +16,9 @@ MonoBehaviour:
   Type: 0
   BehaviourType: 0
   EnemyPrefab: {fileID: 6375017518884761477, guid: f04cfbf37666f9e40b0e552f9105e134, type: 3}
+  ScoreReward: 5
   MaxHealth: 100
-  Damage: 15
+  Damage: 10
   FleeHealthThreshold: 0.4
   EnrageHealthThreshold: 0.35
   ChaseRange: 15

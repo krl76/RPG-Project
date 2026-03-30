@@ -11,6 +11,9 @@ using UnityEditor;
 
 namespace UI.MVC.Controllers
 {
+    /// <summary>
+    /// Контроллер главного меню, запускающий игровые переходы.
+    /// </summary>
     public sealed class MainMenuWindowController
     {
         private readonly IGameStateMachine _gameStateMachine;

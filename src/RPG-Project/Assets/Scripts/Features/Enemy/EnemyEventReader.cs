@@ -3,6 +3,9 @@ using UnityEngine;
 namespace Features.Enemy
 {
     [RequireComponent(typeof(EnemyAnimation))]
+    /// <summary>
+    /// Принимает animation events и передаёт их в систему анимации врага.
+    /// </summary>
     public sealed class EnemyEventReader : MonoBehaviour
     {
         private EnemyAnimation _enemyAnimation;

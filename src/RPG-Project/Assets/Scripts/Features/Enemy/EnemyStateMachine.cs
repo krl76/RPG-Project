@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace Features.Enemy
 {
+    /// <summary>
+    /// Простая машина состояний для поведения врага.
+    /// </summary>
     public sealed class EnemyStateMachine
     {
         private readonly Dictionary<EnemyStateId, IEnemyState> _states = new Dictionary<EnemyStateId, IEnemyState>();

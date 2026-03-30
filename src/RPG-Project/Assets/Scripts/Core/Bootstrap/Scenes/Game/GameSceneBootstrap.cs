@@ -10,6 +10,9 @@ using Input.PlayerInput;
 
 namespace Core.Bootstrap.Scenes.Game
 {
+    /// <summary>
+    /// Собирает и запускает игровые системы после загрузки игровой сцены.
+    /// </summary>
     public sealed class GameSceneBootstrap
     {
         private readonly IPlayerService _playerService;
@@ -74,6 +77,7 @@ namespace Core.Bootstrap.Scenes.Game
             }
 
             _gameSaveInteractor.ApplyPendingGameState();
+            _gameSaveInteractor.ClearPendingRestore();
             _inputManager.ChangeState(_inputManager.GameplayInputState);
 
             _isGameplayInstalled = true;

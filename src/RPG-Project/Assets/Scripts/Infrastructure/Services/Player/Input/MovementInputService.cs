@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 
 namespace Infrastructure.Services.Player.Input
 {
+    /// <summary>
+    /// Сервис обработки движения, спринта и прыжка игрока.
+    /// </summary>
     public class MovementInputService : IMovementInputService
     {
         public bool CanMove { get; set; }

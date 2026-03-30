@@ -13,6 +13,9 @@ using Zenject;
 
 namespace Features.Player
 {
+    /// <summary>
+    /// Обрабатывает физические и магические атаки игрока.
+    /// </summary>
     public class PlayerCombat : MonoBehaviour, IPlayerMagicSubscriber
     {
         [Header("Physical Attack")]

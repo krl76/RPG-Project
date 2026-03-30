@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Infrastructure.Services.Player
 {
+    /// <summary>
+    /// Хранит ссылки на активного игрока в сцене.
+    /// </summary>
     public class PlayerService : IPlayerService
     {
         public GameObject PlayerObject { get; private set; }
