@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace Features.Enemy
 {
-    [RequireComponent(typeof(Animator))]
     /// <summary>
     /// Адаптер работы с параметрами и событиями аниматора врага.
     /// </summary>
+    [RequireComponent(typeof(Animator))]
     public class EnemyAnimation : MonoBehaviour
     {
         private static readonly int WalkSpeedHash = Animator.StringToHash(AnimationID.WALK_SPEED);

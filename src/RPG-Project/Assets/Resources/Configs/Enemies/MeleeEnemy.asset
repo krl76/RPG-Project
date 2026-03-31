@@ -19,7 +19,7 @@ MonoBehaviour:
   ScoreReward: 5
   MaxHealth: 100
   Damage: 10
-  FleeHealthThreshold: 0.4
+  FleeHealthThreshold: 0.5
   EnrageHealthThreshold: 0.35
   ChaseRange: 15
   DisengageRange: 14
